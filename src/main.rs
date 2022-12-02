@@ -11,11 +11,8 @@ struct Args {
 fn get_day_input(day: u8) -> String {
     let file_name = format!("data/day_{}.txt", day);
 
-    match fs::read_to_string(&file_name) {
-        // TODO Find the proper syntax, there was one that was a bit simpler iirc
-        Ok(x) => x,
-        Err(_) => panic!("Could not read file {}", file_name),
-    }
+    fs::read_to_string(&file_name)
+        .unwrap_or_else(|err| panic!("Could not read file {} - Error: {err}", file_name))
 }
 
 fn main() {
