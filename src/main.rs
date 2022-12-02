@@ -8,13 +8,22 @@ struct Args {
     day: Option<u8>,
 }
 
+fn get_day_input(day: u8) -> String {
+    let file_name = format!("data/day_{}.txt", day);
+
+    match fs::read_to_string(&file_name) {
+        // TODO Find the proper syntax, there was one that was a bit simpler iirc
+        Ok(x) => x,
+        Err(_) => panic!("Could not read file {}", file_name),
+    }
+}
+
 fn main() {
     let args = Args::parse();
-    // TODO Make a function to get the day's input
 
+    // TODO Find a better syntax for this, maybe `if let` ?
     if args.day.unwrap_or(1) == 1 {
-        let input =
-            fs::read_to_string("data/day_1.txt").expect("Should have been able to read the file");
+        let input = get_day_input(1);
 
         println!(
             "Day 1.1 result: {}",
@@ -27,8 +36,7 @@ fn main() {
         );
     }
     if args.day.unwrap_or(2) == 2 {
-        let input =
-            fs::read_to_string("data/day_2.txt").expect("Should have been able to read the file");
+        let input = get_day_input(2);
 
         println!(
             "Day 2.1 result: {}",

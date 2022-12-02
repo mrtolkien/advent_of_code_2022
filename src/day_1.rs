@@ -1,15 +1,11 @@
 fn get_calories(input: &str) -> usize {
-    // TODO Write that in a functional way with fold
-    let mut calories = 0;
-
-    for row in input.lines() {
-        match row.parse::<usize>() {
-            Ok(row_value) => calories += row_value,
-            Err(_) => panic!("Could not parse integer: {}", row),
-        }
-    }
-
-    calories
+    input
+        .lines()
+        .map(|line| match line.parse::<usize>() {
+            Ok(line_value) => line_value,
+            Err(_) => panic!("Could not parse integer: {}", line),
+        })
+        .sum()
 }
 
 pub fn get_max_calories(input: &str) -> usize {
