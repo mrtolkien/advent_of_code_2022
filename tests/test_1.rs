@@ -27,9 +27,9 @@ fn test_empty_input() {
 }
 
 #[test]
-#[should_panic]
+#[should_panic(expected = "Could not parse integer: TEST")]
 fn test_faulty_input() {
-    assert_eq!(advent_of_code_2022::day_1::get_max_calories("Hello"), 0);
+    assert_eq!(advent_of_code_2022::day_1::get_max_calories("TEST"), 0);
 }
 
 #[test]

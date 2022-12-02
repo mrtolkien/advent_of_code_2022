@@ -11,7 +11,7 @@ struct Args {
 fn main() {
     let args = Args::parse();
 
-    if args.day.is_none() || args.day.unwrap() == 1 {
+    if args.day.unwrap_or(1) == 1 {
         let day_1_input =
             fs::read_to_string("data/day_1.txt").expect("Should have been able to read the file");
 
