@@ -1,3 +1,5 @@
+use std::str::Split;
+
 use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
 
@@ -58,21 +60,29 @@ impl RoundResult {
     }
 }
 
-fn parse_row_first_hypothesis(row: &str) -> usize {
-    let mut values = row.split(" ");
-
+fn get_opponent_play(values: &mut Split<&str>) -> Play {
     let opponent_play = match values.next() {
         Some("A") => Play::Rock,
         Some("B") => Play::Paper,
         Some("C") => Play::Scissors,
-        _ => panic!("Opponent play not understood"),
+        Some(x) => panic!("Opponent play not understood. Received {x}"),
+        None => panic!("Empty row found"),
     };
+
+    opponent_play
+}
+
+fn parse_row_first_hypothesis(row: &str) -> usize {
+    let mut values = row.split(" ");
+
+    let opponent_play = get_opponent_play(&mut values);
 
     let my_play = match values.next() {
         Some("X") => Play::Rock,
         Some("Y") => Play::Paper,
         Some("Z") => Play::Scissors,
-        _ => panic!("Selected play not understood"),
+        Some(x) => panic!("My play not understood. Received {x}"),
+        None => panic!("No play instruction found"),
     };
 
     let result = RoundResult::build(&opponent_play, &my_play);
@@ -85,18 +95,14 @@ fn parse_row_first_hypothesis(row: &str) -> usize {
 fn parse_row_second_hypothesis(row: &str) -> usize {
     let mut values = row.split(" ");
 
-    let opponent_play = match values.next() {
-        Some("A") => Play::Rock,
-        Some("B") => Play::Paper,
-        Some("C") => Play::Scissors,
-        _ => panic!("Opponent play not understood"),
-    };
+    let opponent_play = get_opponent_play(&mut values);
 
     let result = match values.next() {
         Some("X") => RoundResult::Lose,
         Some("Y") => RoundResult::Draw,
         Some("Z") => RoundResult::Win,
-        _ => panic!("Result not understood"),
+        Some(x) => panic!("My play not understood. Received {x}"),
+        None => panic!("No play instruction found"),
     };
 
     // We re-use the build function we had earlier !
@@ -107,7 +113,7 @@ fn parse_row_second_hypothesis(row: &str) -> usize {
     }
 
     // We should never reach this point so we panic
-    panic!("Cannot select proper play to make for the desired result");
+    panic!("Cannot select proper play for the desired result");
 }
 
 pub fn calculate_score_first_method(input: &str) -> usize {
