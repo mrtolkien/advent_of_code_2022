@@ -28,7 +28,8 @@ jobs:
         with:
           workspaces: tests
 
-      - run: |
+      - name: Check and run tests
+        run: |
           cargo check
           cargo test
         working-directory: tests
