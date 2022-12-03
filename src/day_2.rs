@@ -29,20 +29,6 @@ impl Play {
     }
 }
 
-impl PartialOrd for Play {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        if self == other {
-            return Some(std::cmp::Ordering::Equal);
-        } else if self.beats() == other {
-            return Some(std::cmp::Ordering::Greater);
-        } else if other.beats() == self {
-            return Some(std::cmp::Ordering::Less);
-        } else {
-            panic!("Could not compare plays");
-        }
-    }
-}
-
 #[derive(PartialEq)]
 enum RoundResult {
     Win,
@@ -60,12 +46,14 @@ impl RoundResult {
     }
 
     fn build(opponent_play: &Play, my_play: &Play) -> RoundResult {
-        if my_play > opponent_play {
-            RoundResult::Win
-        } else if my_play < opponent_play {
-            RoundResult::Lose
+        if my_play == opponent_play {
+            return RoundResult::Draw;
+        } else if my_play.beats() == opponent_play {
+            return RoundResult::Win;
+        } else if opponent_play.beats() == my_play {
+            return RoundResult::Lose;
         } else {
-            RoundResult::Draw
+            panic!("Could not compare plays");
         }
     }
 }
@@ -132,25 +120,4 @@ pub fn calculate_score_second_method(input: &str) -> usize {
     input
         .lines()
         .fold(0, |acc, x| acc + parse_row_second_hypothesis(x))
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_ordering() {
-        let paper = Play::Paper;
-        let rock = Play::Rock;
-
-        assert!(paper > rock);
-    }
-
-    #[test]
-    fn test_other_ordering() {
-        let paper = Play::Paper;
-        let other_paper = Play::Paper;
-
-        assert!(paper == other_paper);
-    }
 }
