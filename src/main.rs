@@ -1,4 +1,4 @@
-// TODO Add CI/CD for fun :D
+// TODO Learn how to do test coverage in Rust!
 use clap::Parser;
 use std::fs;
 
@@ -20,6 +20,7 @@ fn main() {
     let args = Args::parse();
 
     // TODO Find a better syntax for this, maybe `if let` ?
+    // TODO -> Make days into a struct made of 2 functions
     if args.day.unwrap_or(1) == 1 {
         let input = get_day_input(1);
 
