@@ -42,8 +42,22 @@ fn main() {
             advent_of_code_2022::day_2::calculate_score_first_method(&input)
         );
         println!(
-            "Day 2.1 result: {}",
+            "Day 2.2 result: {}",
             advent_of_code_2022::day_2::calculate_score_second_method(&input)
+        );
+    }
+
+    if args.day.unwrap_or(3) == 3 {
+        let input = get_day_input(3);
+
+        println!(
+            "Day 3.1 result: {}",
+            advent_of_code_2022::day_3::sum_priorities(&input)
+        );
+
+        println!(
+            "Day 3.2 result: {}",
+            advent_of_code_2022::day_3::sum_triple_priorities(&input)
         );
     }
 }
