@@ -22,6 +22,7 @@ pub fn sum_triple_priorities(input: &str) -> usize {
 
     let lines_count = input.lines().count();
 
+    // TODO Find a way to do that without unwrap
     for i in 0..lines_count / 3 {
         let line_1 = input.lines().nth(i * 3).unwrap();
         let line_2 = input.lines().nth(i * 3 + 1).unwrap();
