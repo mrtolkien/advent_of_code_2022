@@ -1,3 +1,4 @@
+// TODO Add CI/CD for fun :D
 use clap::Parser;
 use std::fs;
 

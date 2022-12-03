@@ -1,35 +1,44 @@
 use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
 
+/// A play in a game of Rocks Paper Scissors
 #[derive(PartialEq, EnumIter)]
-enum Plays {
+enum Play {
     Rock,
     Paper,
     Scissors,
 }
 
-impl Plays {
+impl Play {
+    /// Returns what this [`Play`] beats
+    fn beats(&self) -> &Play {
+        match self {
+            Play::Rock => &Play::Scissors,
+            Play::Paper => &Play::Rock,
+            Play::Scissors => &Play::Paper,
+        }
+    }
+
+    /// Returns the point value of this [`Play`]
     fn value(&self) -> usize {
         match self {
-            Plays::Rock => 1,
-            Plays::Paper => 2,
-            Plays::Scissors => 3,
+            Play::Rock => 1,
+            Play::Paper => 2,
+            Play::Scissors => 3,
         }
     }
 }
 
-impl PartialOrd for Plays {
+impl PartialOrd for Play {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        // Not using a match here as I don't want to duplicate code
         if self == other {
             return Some(std::cmp::Ordering::Equal);
-        } else if self == &Plays::Rock && other == &Plays::Scissors
-            || self == &Plays::Paper && other == &Plays::Rock
-            || self == &Plays::Scissors && other == &Plays::Paper
-        {
+        } else if self.beats() == other {
             return Some(std::cmp::Ordering::Greater);
-        } else {
+        } else if other.beats() == self {
             return Some(std::cmp::Ordering::Less);
+        } else {
+            panic!("Could not compare plays");
         }
     }
 }
@@ -50,7 +59,7 @@ impl RoundResult {
         }
     }
 
-    fn build(opponent_play: &Plays, my_play: &Plays) -> RoundResult {
+    fn build(opponent_play: &Play, my_play: &Play) -> RoundResult {
         if my_play > opponent_play {
             RoundResult::Win
         } else if my_play < opponent_play {
@@ -65,16 +74,16 @@ fn parse_row_first_hypothesis(row: &str) -> usize {
     let mut values = row.split(" ");
 
     let opponent_play = match values.next() {
-        Some("A") => Plays::Rock,
-        Some("B") => Plays::Paper,
-        Some("C") => Plays::Scissors,
+        Some("A") => Play::Rock,
+        Some("B") => Play::Paper,
+        Some("C") => Play::Scissors,
         _ => panic!("Opponent play not understood"),
     };
 
     let my_play = match values.next() {
-        Some("X") => Plays::Rock,
-        Some("Y") => Plays::Paper,
-        Some("Z") => Plays::Scissors,
+        Some("X") => Play::Rock,
+        Some("Y") => Play::Paper,
+        Some("Z") => Play::Scissors,
         _ => panic!("Selected play not understood"),
     };
 
@@ -89,9 +98,9 @@ fn parse_row_second_hypothesis(row: &str) -> usize {
     let mut values = row.split(" ");
 
     let opponent_play = match values.next() {
-        Some("A") => Plays::Rock,
-        Some("B") => Plays::Paper,
-        Some("C") => Plays::Scissors,
+        Some("A") => Play::Rock,
+        Some("B") => Play::Paper,
+        Some("C") => Play::Scissors,
         _ => panic!("Opponent play not understood"),
     };
 
@@ -103,7 +112,7 @@ fn parse_row_second_hypothesis(row: &str) -> usize {
     };
 
     // We re-use the build function we had earlier !
-    for my_play in Plays::iter() {
+    for my_play in Play::iter() {
         if RoundResult::build(&opponent_play, &my_play) == result {
             return my_play.value() + result.value();
         }
@@ -131,16 +140,16 @@ mod tests {
 
     #[test]
     fn test_ordering() {
-        let paper = Plays::Paper;
-        let rock = Plays::Rock;
+        let paper = Play::Paper;
+        let rock = Play::Rock;
 
         assert!(paper > rock);
     }
 
     #[test]
     fn test_other_ordering() {
-        let paper = Plays::Paper;
-        let other_paper = Plays::Paper;
+        let paper = Play::Paper;
+        let other_paper = Play::Paper;
 
         assert!(paper == other_paper);
     }
