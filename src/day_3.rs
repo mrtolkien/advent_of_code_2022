@@ -13,28 +13,18 @@ pub fn sum_priorities(input: &str) -> usize {
 }
 
 pub fn sum_triple_priorities(input: &str) -> usize {
-    let mut result = 0;
-
-    let lines_count = input.lines().count();
-
-    // TODO Find a way to do that without unwrap
-    for i in 0..lines_count / 3 {
-        let line_1 = input.lines().nth(i * 3).unwrap();
-        let line_2 = input.lines().nth(i * 3 + 1).unwrap();
-        let line_3 = input.lines().nth(i * 3 + 2).unwrap();
-
-        for c in line_1.chars() {
-            if line_2.contains(c) && line_3.contains(c) {
-                result += get_priority(c);
-                break;
+    input.lines().array_chunks::<3>().fold(0, |acc, lines| {
+        for c in lines[0].chars() {
+            if lines[1].contains(c) && lines[2].contains(c) {
+                return acc + get_priority(c);
             }
         }
-    }
 
-    result
+        panic!("No match found for lines: {:?}", lines);
+    })
 }
 
-// Hardcoded constant with space first is simple and fast
+// Hardcoded constant with space first is simple and *very* fast
 const ALPHABET: &str = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 fn get_priority(c: char) -> usize {
