@@ -1,4 +1,5 @@
 // TODO Learn how to do test coverage in Rust!
+// -> First add coverage with Tarpaulin and disable CLI test, then re-add CLI tests
 use clap::Parser;
 use std::fs;
 
