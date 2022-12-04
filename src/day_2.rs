@@ -49,13 +49,13 @@ impl RoundResult {
 
     fn build(opponent_play: &Play, my_play: &Play) -> RoundResult {
         if my_play == opponent_play {
-            return RoundResult::Draw;
+            RoundResult::Draw
         } else if my_play.beats() == opponent_play {
-            return RoundResult::Win;
+            RoundResult::Win
         } else if opponent_play.beats() == my_play {
-            return RoundResult::Lose;
+            RoundResult::Lose
         } else {
-            panic!("Could not compare plays");
+            panic!("Could not compare plays")
         }
     }
 }
@@ -87,9 +87,7 @@ fn parse_row_first_hypothesis(row: &str) -> usize {
 
     let result = RoundResult::build(&opponent_play, &my_play);
 
-    let result = my_play.value() + result.value();
-
-    result
+    my_play.value() + result.value()
 }
 
 fn parse_row_second_hypothesis(row: &str) -> usize {

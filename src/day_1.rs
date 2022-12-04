@@ -3,7 +3,7 @@ fn get_calories(input: &str) -> usize {
         .lines()
         .map(|line| match line.parse::<usize>() {
             Ok(line_value) => line_value,
-            Err(_) => panic!("Could not parse integer: {}", line),
+            Err(_) => panic!("Could not parse integer: {line}"),
         })
         .sum()
 }

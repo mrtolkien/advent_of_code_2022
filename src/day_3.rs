@@ -8,7 +8,7 @@ pub fn sum_priorities(input: &str) -> usize {
             }
         }
 
-        panic!("No match found for line: {}", line);
+        panic!("No match found for line: {line}");
     })
 }
 
@@ -20,7 +20,7 @@ pub fn sum_triple_priorities(input: &str) -> usize {
             }
         }
 
-        panic!("No match found for lines: {:?}", lines);
+        panic!("No match found for lines: {lines:?}");
     })
 }
 
@@ -30,7 +30,7 @@ const ALPHABET: &str = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 fn get_priority(c: char) -> usize {
     match ALPHABET.chars().into_iter().position(|x| x == c) {
         Some(x) => x,
-        None => panic!("Unknown char: {}", c),
+        None => panic!("Unknown char: {c}"),
     }
 }
 

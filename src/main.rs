@@ -11,10 +11,10 @@ struct Args {
 }
 
 fn get_day_input(day: u8) -> String {
-    let file_name = format!("data/day_{}.txt", day);
+    let file_name = format!("data/day_{day}.txt");
 
     fs::read_to_string(&file_name)
-        .unwrap_or_else(|err| panic!("Could not read file {} - Error: {err}", file_name))
+        .unwrap_or_else(|err| panic!("Could not read file {file_name} - Error: {err}"))
 }
 
 fn main() {
