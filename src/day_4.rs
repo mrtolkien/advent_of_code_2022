@@ -1,6 +1,6 @@
 pub fn fully_overlapping_sections(input: &str) -> usize {
     input.lines().fold(0, |acc, line| {
-        let mut parts = line.split(",");
+        let mut parts = line.split(',');
 
         let first_interval = string_to_interval(parts.next().unwrap());
         let second_interval = string_to_interval(parts.next().unwrap());
@@ -18,7 +18,7 @@ pub fn fully_overlapping_sections(input: &str) -> usize {
 
 pub fn overlapping_sections(input: &str) -> usize {
     input.lines().fold(0, |acc, line| {
-        let mut parts = line.split(",");
+        let mut parts = line.split(',');
 
         let x = string_to_interval(parts.next().unwrap());
         let y = string_to_interval(parts.next().unwrap());
@@ -34,7 +34,7 @@ pub fn overlapping_sections(input: &str) -> usize {
 }
 
 fn string_to_interval(input: &str) -> (usize, usize) {
-    let mut parts = input.split("-");
+    let mut parts = input.split('-');
     let first = parts.next().unwrap().parse::<usize>().unwrap();
     let second = parts.next().unwrap().parse::<usize>().unwrap();
 
