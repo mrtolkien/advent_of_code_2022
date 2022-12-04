@@ -1,20 +1,15 @@
 pub fn sum_priorities(input: &str) -> usize {
-    let mut result = 0;
+    input.lines().fold(0, |acc, line| {
+        let (left, right) = line.split_at(line.len() / 2);
 
-    for line in input.lines() {
-        let lenght = line.len();
-        let left_side = &line[0..lenght / 2];
-        let right_side = &line[lenght / 2..lenght];
-
-        for c in left_side.chars() {
-            if right_side.contains(c) {
-                result += get_priority(c);
-                break;
+        for c in left.chars() {
+            if right.contains(c) {
+                return acc + get_priority(c);
             }
         }
-    }
 
-    result
+        panic!("No match found for line: {}", line);
+    })
 }
 
 pub fn sum_triple_priorities(input: &str) -> usize {
@@ -39,18 +34,14 @@ pub fn sum_triple_priorities(input: &str) -> usize {
     result
 }
 
+// Hardcoded constant with space first is simple and fast
+const ALPHABET: &str = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
 fn get_priority(c: char) -> usize {
-    let mut result = 1;
-
-    if c.is_uppercase() {
-        result += 26;
+    match ALPHABET.chars().into_iter().position(|x| x == c) {
+        Some(x) => x,
+        None => panic!("Unknown char: {}", c),
     }
-
-    result += ('a'..='z')
-        .position(|x| x == c.to_lowercase().next().unwrap())
-        .unwrap();
-
-    result
 }
 
 #[cfg(test)]
