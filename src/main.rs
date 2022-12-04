@@ -61,6 +61,17 @@ fn main() {
             advent_of_code_2022::day_3::sum_triple_priorities(&input)
         );
     }
+
+    let day_4_input = get_day_input(4);
+    println!(
+        "Day 4.1 result: {}",
+        advent_of_code_2022::day_4::fully_overlapping_sections(&day_4_input)
+    );
+
+    println!(
+        "Day 4.2 result: {}",
+        advent_of_code_2022::day_4::overlapping_sections(&day_4_input)
+    );
 }
 
 #[cfg(test)]
