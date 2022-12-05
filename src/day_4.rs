@@ -45,9 +45,25 @@ fn string_to_interval(input: &str) -> (usize, usize) {
 mod tests {
     use super::*;
 
+    const DEMO_INPUT: &str = "2-4,6-8
+2-3,4-5
+5-7,7-9
+2-8,3-7
+6-6,4-6
+2-6,4-8";
+
+    #[test]
+    fn test_first_part() {
+        assert_eq!(fully_overlapping_sections(DEMO_INPUT), 2);
+    }
+
+    #[test]
+    fn test_second_part() {
+        assert_eq!(overlapping_sections(DEMO_INPUT), 4);
+    }
+
     #[test]
     fn simple_overlapping() {
-        // TODO Find a more elegant way to test than assert_eq, there was one
         assert_eq!(overlapping_sections("2-4,6-8"), 0);
         assert_eq!(overlapping_sections("5-7,7-9"), 1);
         assert_eq!(overlapping_sections("6-6,4-6"), 1);

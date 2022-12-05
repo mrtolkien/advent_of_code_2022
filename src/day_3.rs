@@ -38,6 +38,23 @@ fn get_priority(c: char) -> usize {
 mod tests {
     use super::*;
 
+    const DEMO_INPUT: &str = "vJrwpWtwJgWrhcsFMMfFFhFp
+jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL
+PmmdzqPrVvPwwTWBwg
+wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn
+ttgJtRGJQctTZtZT
+CrZsJsPPZsGzwwsLwLmpwMDw";
+
+    #[test]
+    fn test_sum_priorities() {
+        assert_eq!(sum_priorities(DEMO_INPUT), 157);
+    }
+
+    #[test]
+    fn test_sum_triple_priorities() {
+        assert_eq!(sum_triple_priorities(DEMO_INPUT), 70);
+    }
+
     #[test]
     fn test_prio() {
         assert_eq!(get_priority('a'), 1);

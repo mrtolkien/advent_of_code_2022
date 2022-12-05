@@ -3,12 +3,6 @@ pub enum CrateMoverVersion {
     V2,
 }
 
-struct MovementInfo {
-    crates_count: usize,
-    from: usize,
-    to: usize,
-}
-
 pub fn find_top_crates(input: &str, version: CrateMoverVersion) -> String {
     let mut data = input.split("\n\n");
 
@@ -16,6 +10,7 @@ pub fn find_top_crates(input: &str, version: CrateMoverVersion) -> String {
     let mut positions = read_starting_position(data.next().unwrap());
 
     // We then iterate on the rows
+    // TODO Add rayon for fun
     for row in data.next().unwrap().lines() {
         match version {
             CrateMoverVersion::V1 => positions = move_crates(positions, row),
@@ -26,8 +21,15 @@ pub fn find_top_crates(input: &str, version: CrateMoverVersion) -> String {
     get_top_crates(&mut positions)
 }
 
+struct MovementInfo {
+    crates_count: usize,
+    from: usize,
+    to: usize,
+}
+
 fn read_starting_position(input: &str) -> Vec<Vec<char>> {
     // TODO This is disgusting but it works, clean it up later
+    // -> Try nom: https://docs.rs/nom/latest/nom/
     let mut reversed_iterator = input.lines().rev();
 
     // We simply check the width here and init with empty vectors
@@ -127,6 +129,25 @@ fn get_top_crates(positions: &mut Vec<Vec<char>>) -> String {
 mod tests {
     use super::*;
 
+    const DEMO_INPUT: &str = "    [D]    
+[N] [C]    
+[Z] [M] [P]
+ 1   2   3 
+
+move 1 from 2 to 1
+move 3 from 1 to 3
+move 2 from 2 to 1
+move 1 from 1 to 2";
+
+    #[test]
+    fn test_first_part() {
+        assert_eq!(find_top_crates(DEMO_INPUT, CrateMoverVersion::V1), "CMZ");
+    }
+
+    #[test]
+    fn test_second_part() {
+        assert_eq!(find_top_crates(DEMO_INPUT, CrateMoverVersion::V2), "MCD");
+    }
     #[test]
     fn test_starting_position() {
         assert_eq!(
