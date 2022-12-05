@@ -72,6 +72,22 @@ fn main() {
         "Day 4.2 result: {}",
         advent_of_code_2022::day_4::overlapping_sections(&day_4_input)
     );
+
+    let day_5_input = get_day_input(5);
+    println!(
+        "Day 5.1 result: {}",
+        advent_of_code_2022::day_5::find_top_crates(
+            &day_5_input,
+            advent_of_code_2022::day_5::CrateMoverVersion::V1
+        )
+    );
+    println!(
+        "Day 5.2 result: {}",
+        advent_of_code_2022::day_5::find_top_crates(
+            &day_5_input,
+            advent_of_code_2022::day_5::CrateMoverVersion::V2
+        )
+    );
 }
 
 // TODO Re-test here with a proper CLI test tool
