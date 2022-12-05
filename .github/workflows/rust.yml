@@ -34,4 +34,3 @@ jobs:
         run: |
           cargo check
           cargo test
-        working-directory: tests
