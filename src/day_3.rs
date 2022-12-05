@@ -64,4 +64,26 @@ CrZsJsPPZsGzwwsLwLmpwMDw";
         assert_eq!(get_priority('B'), 28);
         assert_eq!(get_priority('Z'), 52);
     }
+
+    #[test]
+    #[should_panic]
+    fn test_sum_panic() {
+        sum_priorities("AB");
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_triple_sum_panic() {
+        sum_triple_priorities(
+            "AB
+CD
+FG",
+        );
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_prio_panic() {
+        get_priority('秘');
+    }
 }
