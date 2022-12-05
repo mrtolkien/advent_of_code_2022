@@ -10,7 +10,6 @@ pub fn find_top_crates(input: &str, version: CrateMoverVersion) -> String {
     let mut positions = read_starting_position(data.next().unwrap());
 
     // We then iterate on the rows
-    // TODO Add rayon for fun
     for row in data.next().unwrap().lines() {
         match version {
             CrateMoverVersion::V1 => positions = move_crates(positions, row),
