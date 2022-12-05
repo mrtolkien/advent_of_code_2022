@@ -1,14 +1,31 @@
+struct Interval {
+    start: usize,
+    end: usize,
+}
+
+impl Interval {
+    fn contains(&self, other_interval: &Interval) -> bool {
+        self.start <= other_interval.start && other_interval.end <= self.end
+    }
+
+    fn overlap(&self, other_interval: &Interval) -> bool {
+        // Smart solution:
+        // https://stackoverflow.com/questions/3269434/whats-the-most-efficient-way-to-test-if-two-ranges-overlap
+        self.start <= other_interval.end && other_interval.start <= self.end
+    }
+}
+
+fn get_intervals(line: &str) -> (Interval, Interval) {
+    let (left, right) = line.split_once(',').unwrap();
+
+    (string_to_interval(left), string_to_interval(right))
+}
+
 pub fn fully_overlapping_sections(input: &str) -> usize {
     input.lines().fold(0, |acc, line| {
-        let mut parts = line.split(',');
+        let (x, y) = get_intervals(line);
 
-        let first_interval = string_to_interval(parts.next().unwrap());
-        let second_interval = string_to_interval(parts.next().unwrap());
-
-        // TODO REWRITE
-        if (first_interval.0 >= second_interval.0 && first_interval.1 <= second_interval.1)
-            || (second_interval.0 >= first_interval.0 && second_interval.1 <= first_interval.1)
-        {
+        if x.contains(&y) || y.contains(&x) {
             acc + 1
         } else {
             acc
@@ -18,14 +35,9 @@ pub fn fully_overlapping_sections(input: &str) -> usize {
 
 pub fn overlapping_sections(input: &str) -> usize {
     input.lines().fold(0, |acc, line| {
-        let mut parts = line.split(',');
+        let (x, y) = get_intervals(line);
 
-        let x = string_to_interval(parts.next().unwrap());
-        let y = string_to_interval(parts.next().unwrap());
-
-        // Smart solution:
-        // https://stackoverflow.com/questions/3269434/whats-the-most-efficient-way-to-test-if-two-ranges-overlap
-        if x.0 <= y.1 && y.0 <= x.1 {
+        if x.overlap(&y) {
             acc + 1
         } else {
             acc
@@ -33,12 +45,13 @@ pub fn overlapping_sections(input: &str) -> usize {
     })
 }
 
-fn string_to_interval(input: &str) -> (usize, usize) {
-    let mut parts = input.split('-');
-    let first = parts.next().unwrap().parse::<usize>().unwrap();
-    let second = parts.next().unwrap().parse::<usize>().unwrap();
+fn string_to_interval(input: &str) -> Interval {
+    let (left, right) = input.split_once('-').unwrap();
 
-    (first, second)
+    Interval {
+        start: left.parse::<usize>().unwrap(),
+        end: right.parse::<usize>().unwrap(),
+    }
 }
 
 #[cfg(test)]
