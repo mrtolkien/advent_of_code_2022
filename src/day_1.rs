@@ -1,3 +1,5 @@
+use rayon::prelude::*;
+
 fn get_calories(input: &str) -> usize {
     input
         .lines()
@@ -40,7 +42,8 @@ pub fn get_sum_top_three_calories(input: &str) -> usize {
         }
     }
 
-    top_3_calories.iter().sum()
+    // P A R A L L E L / / /
+    top_3_calories.par_iter().sum()
 }
 
 #[cfg(test)]
