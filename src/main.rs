@@ -74,12 +74,13 @@ fn main() {
     );
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+// TODO Re-test here with a proper CLI test tool
+// #[cfg(test)]
+// mod tests {
+//     use super::*;
 
-    #[test]
-    fn test_full_run() {
-        main();
-    }
-}
+//     #[test]
+//     fn test_full_run() {
+//         main();
+//     }
+// }
