@@ -4,16 +4,17 @@ use std::{fmt::Display, fs};
 fn get_day_input(day: u8) -> String {
     let file_name = format!("data/day_{day}.txt");
 
-    fs::read_to_string(&file_name)
-        .unwrap_or_else(|err| panic!("Could not read file {file_name} - Error: {err}"))
+    // We simply don't return anything if the file doesn't exist
+    fs::read_to_string(&file_name).unwrap_or("".to_string())
 }
 
 fn main() {
-    for i in 1..=6 {
+    for i in 1..=7 {
+        // We read the input from the file
         let input = get_day_input(i);
         let input = input.as_str();
 
-        // We need to define results as dynamically typed first
+        // We need to define results as dynamically typed first so it accepts str and u32
         let results: (Box<dyn Display>, Box<dyn Display>);
 
         results = match i {
@@ -37,9 +38,14 @@ fn main() {
                 Box::new(day_5::find_top_crates(input, day_5::CrateMoverVersion::V1)),
                 Box::new(day_5::find_top_crates(input, day_5::CrateMoverVersion::V2)),
             ),
-            _ => (
+            6 => (
                 Box::new(day_6::get_packet_start(input, 4)),
                 Box::new(day_6::get_packet_start(input, 14)),
+            ),
+            // Not panicking helps test it properly
+            _ => (
+                Box::new(format!("Day {i} not handled yet")),
+                Box::new(format!("Day {i} not handled yet")),
             ),
         };
 
