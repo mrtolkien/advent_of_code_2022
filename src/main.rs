@@ -88,6 +88,18 @@ fn main() {
             advent_of_code_2022::day_5::CrateMoverVersion::V2
         )
     );
+
+    let day_6_input = get_day_input(6);
+
+    println!(
+        "Day 6.1 result: {:?}",
+        advent_of_code_2022::day_6::get_packet_start(&day_6_input, 4)
+    );
+
+    println!(
+        "Day 6.2 result: {:?}",
+        advent_of_code_2022::day_6::get_packet_start(&day_6_input, 14)
+    );
 }
 
 // TODO Re-test here with a proper CLI test tool
