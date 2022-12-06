@@ -1,6 +1,23 @@
 use itertools::Itertools;
 use std::collections::VecDeque;
 
+/// Returns the starting index (starting at 1) of the first packet in the given input string.
+///
+/// A packet is defined as a sequence of `distinct_letters` distinct letters in the input string.
+///
+/// # Arguments
+///
+/// * `input` - A string slice containing the input text to search for packets in.
+/// * `distinct_letters` - The number of distinct letters that a packet should contain.
+/// # Examples
+///
+/// ```
+/// use advent_of_code_2022::day_6::get_packet_start;
+///
+/// assert_eq!(get_packet_start("ABC", 2), 2);
+/// assert_eq!(get_packet_start("AAABC", 3), 5);
+/// assert_eq!(get_packet_start("ABCCDEF", 4), 7);
+/// ```
 pub fn get_packet_start(input: &str, distinct_letters: usize) -> usize {
     let mut last_chars = VecDeque::new();
 

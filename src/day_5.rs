@@ -3,6 +3,32 @@ pub enum CrateMoverVersion {
     V2,
 }
 
+/// Finds the top crates after performing the given actions on them.
+///
+/// # Arguments
+///
+/// * `input`: a string representing the starting positions and actions to be performed on the crates.
+/// * `version`: the version of the crate mover to use.
+///
+/// # Returns
+///
+/// A string containing a comma-separated list of the top crates after all the actions have been performed.
+///
+/// # Examples
+///
+/// ```
+/// use advent_of_code_2022::day_5::find_top_crates;
+/// use advent_of_code_2022::day_5::CrateMoverVersion;
+///
+/// let input = "[N] [C]    
+///[Z] [M]
+///1   2  
+///
+///move 1 from 2 to 1";
+///
+/// assert_eq!(find_top_crates(input, CrateMoverVersion::V1), "CM");
+/// ```
+///
 pub fn find_top_crates(input: &str, version: CrateMoverVersion) -> String {
     let mut data = input.split("\n\n");
 
