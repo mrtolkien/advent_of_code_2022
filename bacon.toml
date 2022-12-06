@@ -9,12 +9,16 @@ default_job = "check"
 command = [
     "cargo",
     "tarpaulin",
+    "--skip-clean",
     "--out",
     "Lcov",
     "--output-dir",
     "coverage",
     "--color",
     "always",
+    # Different folder because different compilation flags
+    "--target-dir",
+    "target/coverage",
 ]
 need_stdout = true
 watch = ["tests"]
