@@ -21,6 +21,22 @@ fn get_intervals(line: &str) -> (Interval, Interval) {
     (string_to_interval(left), string_to_interval(right))
 }
 
+/// This function takes an input string `input` and returns the number of
+/// fully overlapping sections of two intervals.
+///
+/// # Arguments
+///
+/// * `input` - A string slice containing the input intervals in the "a-b,x-y" format.
+///
+/// # Examples
+///
+/// ```
+/// use advent_of_code_2022::day_4::fully_overlapping_sections;
+/// let input = "1-4,1-2
+/// 1-2,3-4";
+/// let result = fully_overlapping_sections(input);
+/// assert_eq!(result, 1);
+/// ```
 pub fn fully_overlapping_sections(input: &str) -> usize {
     input.lines().fold(0, |acc, line| {
         let (x, y) = get_intervals(line);

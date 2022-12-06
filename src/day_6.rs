@@ -66,4 +66,10 @@ mod tests {
         );
         assert_eq!(get_packet_start("zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw", 14), 26);
     }
+
+    #[test]
+    #[should_panic]
+    fn test_start_message_marker_panic() {
+        get_packet_start("mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm", 15);
+    }
 }

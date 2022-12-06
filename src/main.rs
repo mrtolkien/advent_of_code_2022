@@ -1,14 +1,5 @@
-// TODO Learn how to do test coverage in Rust!
-// -> First add coverage with Tarpaulin and disable CLI test, then re-add CLI tests
-use clap::Parser;
-use std::fs;
-
-#[derive(Parser)]
-#[command(version)]
-struct Args {
-    /// Which day to run
-    day: Option<u8>,
-}
+use advent_of_code_2022::{day_1, day_2, day_3, day_4, day_5, day_6};
+use std::{fmt::Display, fs};
 
 fn get_day_input(day: u8) -> String {
     let file_name = format!("data/day_{day}.txt");
@@ -18,97 +9,52 @@ fn get_day_input(day: u8) -> String {
 }
 
 fn main() {
-    let args = Args::parse();
+    for i in 1..=6 {
+        let input = get_day_input(i);
+        let input = input.as_str();
 
-    // TODO Find a better syntax for this, maybe `if let` ?
-    // TODO -> Make days into a struct made of 2 functions
-    if args.day.unwrap_or(1) == 1 {
-        let input = get_day_input(1);
+        // We need to define results as dynamically typed first
+        let results: (Box<dyn Display>, Box<dyn Display>);
 
-        println!(
-            "Day 1.1 result: {}",
-            advent_of_code_2022::day_1::get_max_calories(&input)
-        );
+        results = match i {
+            1 => (
+                Box::new(day_1::get_max_calories(input)),
+                Box::new(day_1::get_sum_top_three_calories(input)),
+            ),
+            2 => (
+                Box::new(day_2::calculate_score_first_method(input)),
+                Box::new(day_2::calculate_score_second_method(input)),
+            ),
+            3 => (
+                Box::new(day_3::sum_priorities(input)),
+                Box::new(day_3::sum_triple_priorities(input)),
+            ),
+            4 => (
+                Box::new(day_4::fully_overlapping_sections(input)),
+                Box::new(day_4::overlapping_sections(input)),
+            ),
+            5 => (
+                Box::new(day_5::find_top_crates(input, day_5::CrateMoverVersion::V1)),
+                Box::new(day_5::find_top_crates(input, day_5::CrateMoverVersion::V2)),
+            ),
+            6 => (
+                Box::new(day_6::get_packet_start(input, 4)),
+                Box::new(day_6::get_packet_start(input, 14)),
+            ),
+            _ => panic!("No solution for day {i}"),
+        };
 
-        println!(
-            "Day 1.2 result: {}",
-            advent_of_code_2022::day_1::get_sum_top_three_calories(&input)
-        );
+        println!("Day {i}.1 result: {}", results.0);
+        println!("Day {i}.2 result: {}", results.1);
     }
-    if args.day.unwrap_or(2) == 2 {
-        let input = get_day_input(2);
-
-        println!(
-            "Day 2.1 result: {}",
-            advent_of_code_2022::day_2::calculate_score_first_method(&input)
-        );
-        println!(
-            "Day 2.2 result: {}",
-            advent_of_code_2022::day_2::calculate_score_second_method(&input)
-        );
-    }
-
-    if args.day.unwrap_or(3) == 3 {
-        let input = get_day_input(3);
-
-        println!(
-            "Day 3.1 result: {}",
-            advent_of_code_2022::day_3::sum_priorities(&input)
-        );
-
-        println!(
-            "Day 3.2 result: {}",
-            advent_of_code_2022::day_3::sum_triple_priorities(&input)
-        );
-    }
-
-    let day_4_input = get_day_input(4);
-    println!(
-        "Day 4.1 result: {}",
-        advent_of_code_2022::day_4::fully_overlapping_sections(&day_4_input)
-    );
-
-    println!(
-        "Day 4.2 result: {}",
-        advent_of_code_2022::day_4::overlapping_sections(&day_4_input)
-    );
-
-    let day_5_input = get_day_input(5);
-    println!(
-        "Day 5.1 result: {}",
-        advent_of_code_2022::day_5::find_top_crates(
-            &day_5_input,
-            advent_of_code_2022::day_5::CrateMoverVersion::V1
-        )
-    );
-    println!(
-        "Day 5.2 result: {}",
-        advent_of_code_2022::day_5::find_top_crates(
-            &day_5_input,
-            advent_of_code_2022::day_5::CrateMoverVersion::V2
-        )
-    );
-
-    let day_6_input = get_day_input(6);
-
-    println!(
-        "Day 6.1 result: {:?}",
-        advent_of_code_2022::day_6::get_packet_start(&day_6_input, 4)
-    );
-
-    println!(
-        "Day 6.2 result: {:?}",
-        advent_of_code_2022::day_6::get_packet_start(&day_6_input, 14)
-    );
 }
 
-// TODO Re-test here with a proper CLI test tool
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-//     #[test]
-//     fn test_full_run() {
-//         main();
-//     }
-// }
+    #[test]
+    fn test_full_run() {
+        main();
+    }
+}

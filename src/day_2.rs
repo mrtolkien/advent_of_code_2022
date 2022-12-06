@@ -46,7 +46,6 @@ impl RoundResult {
     }
 
     fn build(opponent_play: &Play, my_play: &Play) -> RoundResult {
-        // TODO Implement ordering to guarantee completeness?
         if my_play.beats() == opponent_play {
             RoundResult::Win
         } else if opponent_play.beats() == my_play {
