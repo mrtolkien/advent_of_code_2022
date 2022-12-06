@@ -185,6 +185,14 @@ move 1 from 1 to 2";
             ),
             vec![vec!['Z', 'N'], vec!['M'], vec!['P', 'D', 'C']]
         );
+
+        assert_eq!(
+            move_crates(
+                vec![vec!['Z', 'N'], vec!['M', 'C', 'D'], vec!['P']],
+                "move 2 from 1 to 3",
+            ),
+            vec![vec![], vec!['M', 'C', 'D'], vec!['P', 'N', 'Z']]
+        );
     }
 
     #[test]
