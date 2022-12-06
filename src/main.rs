@@ -37,11 +37,10 @@ fn main() {
                 Box::new(day_5::find_top_crates(input, day_5::CrateMoverVersion::V1)),
                 Box::new(day_5::find_top_crates(input, day_5::CrateMoverVersion::V2)),
             ),
-            6 => (
+            _ => (
                 Box::new(day_6::get_packet_start(input, 4)),
                 Box::new(day_6::get_packet_start(input, 14)),
             ),
-            _ => panic!("No solution for day {i}"),
         };
 
         println!("Day {i}.1 result: {}", results.0);
