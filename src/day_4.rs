@@ -16,7 +16,7 @@ impl Interval {
 }
 
 fn get_intervals(line: &str) -> (Interval, Interval) {
-    let (left, right) = line.split_once(',').unwrap();
+    let (left, right) = line.split_once(',').expect("Misformed input: {line:?");
 
     (string_to_interval(left), string_to_interval(right))
 }
@@ -46,11 +46,15 @@ pub fn overlapping_sections(input: &str) -> usize {
 }
 
 fn string_to_interval(input: &str) -> Interval {
-    let (left, right) = input.split_once('-').unwrap();
+    let (left, right) = input.split_once('-').expect("Misformed input: {input:?}");
 
     Interval {
-        start: left.parse::<usize>().unwrap(),
-        end: right.parse::<usize>().unwrap(),
+        start: left
+            .parse::<usize>()
+            .expect("Could not parse {left:?} as integer"),
+        end: right
+            .parse::<usize>()
+            .expect("Could not parse {right:?} as integer"),
     }
 }
 

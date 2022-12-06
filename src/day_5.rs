@@ -7,10 +7,10 @@ pub fn find_top_crates(input: &str, version: CrateMoverVersion) -> String {
     let mut data = input.split("\n\n");
 
     // This gets the starting block
-    let mut positions = read_starting_position(data.next().unwrap());
+    let mut positions = read_starting_position(data.next().expect("Empty input string"));
 
     // We then iterate on the rows
-    for row in data.next().unwrap().lines() {
+    for row in data.next().expect("No actions founds").lines() {
         match version {
             CrateMoverVersion::V1 => positions = move_crates(positions, row),
             CrateMoverVersion::V2 => positions = move_crates_v2(positions, row),
@@ -32,7 +32,12 @@ fn read_starting_position(input: &str) -> Vec<Vec<char>> {
     let mut reversed_iterator = input.lines().rev();
 
     // We simply check the width here and init with empty vectors
-    let columns = reversed_iterator.next().unwrap().len() / 4 + 1 as usize;
+    let columns = reversed_iterator
+        .next()
+        .expect("Empty starting position data: {input:?}")
+        .len()
+        / 4
+        + 1;
 
     let mut result = vec![];
 
@@ -61,6 +66,7 @@ fn get_movement_info(row: &str) -> MovementInfo {
 
     lines.next();
 
+    // TODO Fix all the unwraps with a proper Result return type!
     let crates_count: usize = lines.next().unwrap().parse().unwrap();
 
     lines.next();
@@ -79,46 +85,47 @@ fn get_movement_info(row: &str) -> MovementInfo {
 }
 
 fn move_crates(positions: Vec<Vec<char>>, row: &str) -> Vec<Vec<char>> {
-    let mut new_positions = positions.clone();
+    // TODO This does a copy? -> Understand the line
+    let mut positions = positions;
 
     let movement_info = get_movement_info(row);
 
     let mut moving_crates = vec![];
 
     for _ in 0..movement_info.crates_count {
-        moving_crates.push(new_positions[movement_info.from - 1].pop().unwrap());
+        moving_crates.push(positions[movement_info.from - 1].pop().unwrap());
     }
 
     for crate_ in moving_crates {
-        new_positions[movement_info.to - 1].push(crate_);
+        positions[movement_info.to - 1].push(crate_);
     }
 
-    new_positions
+    positions
 }
 
 fn move_crates_v2(positions: Vec<Vec<char>>, row: &str) -> Vec<Vec<char>> {
-    let mut new_positions = positions.clone();
+    let mut positions = positions;
 
     let movement_info = get_movement_info(row);
 
     let mut moving_crates = vec![];
 
     for _ in 0..movement_info.crates_count {
-        moving_crates.push(new_positions[movement_info.from - 1].pop().unwrap());
+        moving_crates.push(positions[movement_info.from - 1].pop().unwrap());
     }
 
     for crate_ in moving_crates.iter().rev() {
-        new_positions[movement_info.to - 1].push(*crate_);
+        positions[movement_info.to - 1].push(*crate_);
     }
 
-    new_positions
+    positions
 }
 
 fn get_top_crates(positions: &mut Vec<Vec<char>>) -> String {
     let mut result = "".to_string();
 
     for column in positions {
-        result = result + column.pop().unwrap().to_string().as_str();
+        result += column.pop().unwrap().to_string().as_str();
     }
 
     result

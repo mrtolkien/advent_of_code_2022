@@ -1,10 +1,8 @@
-use std::str::Split;
-
 use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
 
 /// A play in a game of Rocks Paper Scissors
-#[derive(PartialEq, EnumIter)]
+#[derive(PartialEq, EnumIter, Debug)]
 enum Play {
     Rock,
     Paper,
@@ -48,41 +46,41 @@ impl RoundResult {
     }
 
     fn build(opponent_play: &Play, my_play: &Play) -> RoundResult {
-        if my_play == opponent_play {
-            RoundResult::Draw
-        } else if my_play.beats() == opponent_play {
+        // TODO Implement ordering to guarantee completeness?
+        if my_play.beats() == opponent_play {
             RoundResult::Win
         } else if opponent_play.beats() == my_play {
             RoundResult::Lose
         } else {
-            panic!("Could not compare plays")
+            assert_eq!(opponent_play, my_play);
+            RoundResult::Draw
         }
     }
 }
 
-fn get_opponent_play(values: &mut Split<&str>) -> Play {
-    let opponent_play = match values.next() {
-        Some("A") => Play::Rock,
-        Some("B") => Play::Paper,
-        Some("C") => Play::Scissors,
-        Some(x) => panic!("Opponent play not understood. Received {x}"),
-        None => panic!("Empty row found"),
+fn get_opponent_play(letter: &str) -> Play {
+    let opponent_play = match letter {
+        "A" => Play::Rock,
+        "B" => Play::Paper,
+        "C" => Play::Scissors,
+        x => panic!("Opponent play not understood. Received {x}"),
     };
 
     opponent_play
 }
 
 fn parse_row_first_hypothesis(row: &str) -> usize {
-    let mut values = row.split(" ");
+    let (opponent_play, my_play) = row
+        .split_once(' ')
+        .expect("Could not understand play: {row:?");
 
-    let opponent_play = get_opponent_play(&mut values);
+    let opponent_play = get_opponent_play(opponent_play);
 
-    let my_play = match values.next() {
-        Some("X") => Play::Rock,
-        Some("Y") => Play::Paper,
-        Some("Z") => Play::Scissors,
-        Some(x) => panic!("My play not understood. Received {x}"),
-        None => panic!("No play instruction found"),
+    let my_play = match my_play {
+        "X" => Play::Rock,
+        "Y" => Play::Paper,
+        "Z" => Play::Scissors,
+        x => panic!("My play not understood. Received {x}"),
     };
 
     let result = RoundResult::build(&opponent_play, &my_play);
@@ -91,27 +89,25 @@ fn parse_row_first_hypothesis(row: &str) -> usize {
 }
 
 fn parse_row_second_hypothesis(row: &str) -> usize {
-    let mut values = row.split(" ");
+    let (opponent_play, my_play) = row
+        .split_once(' ')
+        .expect("Could not understand play: {row:?");
 
-    let opponent_play = get_opponent_play(&mut values);
+    let opponent_play = get_opponent_play(opponent_play);
 
-    let result = match values.next() {
-        Some("X") => RoundResult::Lose,
-        Some("Y") => RoundResult::Draw,
-        Some("Z") => RoundResult::Win,
-        Some(x) => panic!("My play not understood. Received {x}"),
-        None => panic!("No play instruction found"),
+    let result = match my_play {
+        "X" => RoundResult::Lose,
+        "Y" => RoundResult::Draw,
+        "Z" => RoundResult::Win,
+        x => panic!("My play not understood. Received {x}"),
     };
 
-    // We re-use the build function we had earlier !
-    for my_play in Play::iter() {
-        if RoundResult::build(&opponent_play, &my_play) == result {
-            return my_play.value() + result.value();
-        }
-    }
-
-    // We should never reach this point so we panic
-    panic!("Cannot select proper play for the desired result");
+    Play::iter()
+        .filter(|p| RoundResult::build(&opponent_play, &p) == result)
+        .next()
+        .expect("Did not find a play that matches the result")
+        .value()
+        + result.value()
 }
 
 pub fn calculate_score_first_method(input: &str) -> usize {
@@ -147,5 +143,33 @@ C Z";
     #[test]
     fn test_calculate_score_second_method() {
         assert_eq!(calculate_score_second_method(DEMO_INPUT), 12);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_calculate_score_second_method_panic() {
+        calculate_score_second_method("A A");
+    }
+
+    // Testing that we make the first method panic
+    #[test]
+    #[should_panic]
+    fn test_calculate_score_first_method_panic() {
+        calculate_score_first_method("A A");
+    }
+
+    // Testing that we make the opponent play parser panic
+    #[test]
+    #[should_panic]
+    fn test_get_opponent_play_panic() {
+        get_opponent_play("D");
+    }
+
+    // Testing all beats results
+    #[test]
+    fn test_beats() {
+        assert_eq!(Play::Rock.beats(), &Play::Scissors);
+        assert_eq!(Play::Paper.beats(), &Play::Rock);
+        assert_eq!(Play::Scissors.beats(), &Play::Paper);
     }
 }
