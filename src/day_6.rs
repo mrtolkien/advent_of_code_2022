@@ -26,6 +26,7 @@ pub fn get_packet_start(input: &str, distinct_letters: usize) -> usize {
         last_chars.push_back(current_char);
 
         // If we don't have distinct_letters characters already, we continue
+        // This uses Rust itertools
         if last_chars.len() < distinct_letters {
             continue;
         } else {
