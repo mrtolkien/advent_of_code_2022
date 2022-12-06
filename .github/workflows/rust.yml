@@ -30,7 +30,13 @@ jobs:
         with:
           workspaces: tests
 
-      - name: Check and run tests
+      - name: Check and test
         run: |
           cargo check
+          cargo build
           cargo test
+
+      - name: Compute and upload coverage
+        run: |
+          cargo tarpaulin --out Xml
+          bash <(curl -s https://codecov.io/bash)
