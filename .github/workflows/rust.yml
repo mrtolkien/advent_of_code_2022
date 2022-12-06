@@ -38,5 +38,6 @@ jobs:
 
       - name: Compute and upload coverage
         run: |
+          cargo install cargo-tarpaulin
           cargo tarpaulin --out Xml
           bash <(curl -s https://codecov.io/bash)
