@@ -1,4 +1,4 @@
-use advent_of_code_2022::{day_1, day_2, day_3, day_4, day_5, day_6};
+use advent_of_code_2022::{day_1, day_2, day_3, day_4, day_5, day_6, day_7};
 use std::{fmt::Display, fs};
 
 fn get_day_input(day: u8) -> String {
@@ -9,7 +9,7 @@ fn get_day_input(day: u8) -> String {
 }
 
 fn main() {
-    for i in 1..=7 {
+    for i in 1..=8 {
         // We read the input from the file
         let input = get_day_input(i);
         let input = input.as_str();
@@ -39,6 +39,10 @@ fn main() {
             6 => (
                 Box::new(day_6::get_packet_start(input, 4)),
                 Box::new(day_6::get_packet_start(input, 14)),
+            ),
+            7 => (
+                Box::new(day_7::get_sum_of_dir_sizes(input, 100_000)),
+                Box::new(day_7::get_sum_of_dir_sizes(input, 100_000)),
             ),
             // Not panicking helps test it properly
             _ => (
