@@ -13,11 +13,11 @@ fn get_calories(input: &str) -> usize {
 
 pub fn get_max_calories(input: &str) -> usize {
     input
-        // TODO Understand Rayon patterns and make it parallel!
         .split("\n\n")
+        .par_bridge()
         .map(|x| get_calories(x))
         .max()
-        .expect("No calories found")
+        .expect("No calories found in input {input}")
 }
 
 pub fn get_sum_top_three_calories(input: &str) -> usize {
