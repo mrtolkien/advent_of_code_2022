@@ -4,19 +4,16 @@ use nom::character::complete::{alpha1, space0};
 use nom::sequence::tuple;
 use nom::IResult;
 
-struct Dir {
-    name: String,
-    file_sizes: usize,
-}
-
 /// Gets the sum of the sizes of all directories that are less than max_size
-pub fn get_sum_of_dir_sizes(input: &str, max_size: usize) -> usize {
-    // Current dir will point to the current directory
+pub fn get_sum_of_small_dir_sizes(input: &str, max_size: usize) -> usize {
+    // cwd will point to the current directory as a vec of dir names
     let mut cwd = Vec::new();
-    // Directories will hold directory information through a unique path
+
+    // Directories will hold directory file sizes through their path
     let mut directories = HashMap::new();
 
     // First, we build our filesystem tree
+    // TODO Make it into its own function that returns directories
     for command_input in input.split("$ ") {
         // TODO This is once again disgusting but I want to get it done... I think nom can do that better
         // -> The first split matches to "" since it starts with the pattern
@@ -29,25 +26,24 @@ pub fn get_sum_of_dir_sizes(input: &str, max_size: usize) -> usize {
 
         // We apply the command
         match command {
-            // Backards -> We remove one element from the current_dir
+            // Backards -> We remove one element from the cwd
             Command::CD(CommandCD::Backwards) => {
                 cwd.pop();
             }
-            // Forward -> We add one element to the current_dir
+
+            // Forward -> We add one element to the cwd
             Command::CD(CommandCD::Path(x)) => cwd.push(x),
+
             // LS -> We parse the information
             Command::LS => {
-                let current_dir_name = get_current_dir_name(&cwd);
-
-                let dir_struct = directories.entry(current_dir_name.clone()).or_insert(Dir {
-                    name: current_dir_name.clone(),
-                    file_sizes: 0,
-                });
-
                 for line in lines {
                     match DirValue::build(line) {
                         DirValue::File(size) => {
-                            dir_struct.file_sizes += size;
+                            let dir_size = directories
+                                .entry(get_current_dir_name(&cwd))
+                                .or_insert(0 as usize);
+
+                            *dir_size += size;
                         }
                         // We simply pass if we found a dir, we'll match on path names!
                         DirValue::Dir(_) => (),
@@ -57,21 +53,20 @@ pub fn get_sum_of_dir_sizes(input: &str, max_size: usize) -> usize {
         }
     }
 
-    // Then, we check each folder's size by recursively checking its children
-    let mut result = 0;
-
-    for directory in directories.values() {
+    // We check all directories and fold them into a result
+    directories.keys().fold(0, |result, dir_name| {
+        // We check each directory size by recursively checking its children
         let size = directories
             .iter()
-            .filter(|x| x.0.starts_with(&directory.name))
-            .fold(0, |size, x| size + x.1.file_sizes);
+            .filter(|(name, _)| name.starts_with(dir_name))
+            .fold(0, |size, (_, child_size)| size + child_size);
 
         if size <= max_size {
-            result += size
+            result + size
+        } else {
+            result
         }
-    }
-
-    result
+    })
 }
 
 fn get_current_dir_name(current_dir: &Vec<String>) -> String {
@@ -175,7 +170,7 @@ mod tests {
 
     #[test]
     fn test_first_part() {
-        assert_eq!(get_sum_of_dir_sizes(DEMO_INPUT, 100_000), 95_437);
+        assert_eq!(get_sum_of_small_dir_sizes(DEMO_INPUT, 100_000), 95_437);
     }
 
     const DEMO_INPUT: &str = "$ cd /

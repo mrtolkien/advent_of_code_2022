@@ -41,8 +41,8 @@ fn main() {
                 Box::new(day_6::get_packet_start(input, 14)),
             ),
             7 => (
-                Box::new(day_7::get_sum_of_dir_sizes(input, 100_000)),
-                Box::new(day_7::get_sum_of_dir_sizes(input, 100_000)),
+                Box::new(day_7::get_sum_of_small_dir_sizes(input, 100_000)),
+                Box::new(day_7::get_sum_of_small_dir_sizes(input, 100_000)),
             ),
             // Not panicking helps test it properly
             _ => (
