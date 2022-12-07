@@ -157,7 +157,7 @@ fn move_crates_v2(positions: Vec<Vec<char>>, row: &str) -> Vec<Vec<char>> {
     positions
 }
 
-fn get_top_crates(positions: &Vec<Vec<char>>) -> String {
+fn get_top_crates(positions: &[Vec<char>]) -> String {
     positions.iter().fold("".to_string(), |result, column| {
         result
             + column
