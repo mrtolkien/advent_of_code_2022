@@ -5,7 +5,7 @@ fn get_day_input(day: u8) -> String {
     let file_name = format!("data/day_{day}.txt");
 
     // We simply don't return anything if the file doesn't exist
-    fs::read_to_string(&file_name).unwrap_or("".to_string())
+    fs::read_to_string(file_name).unwrap_or("".to_string())
 }
 
 fn main() {
@@ -15,9 +15,7 @@ fn main() {
         let input = input.as_str();
 
         // We need to define results as dynamically typed first so it accepts str and u32
-        let results: (Box<dyn Display>, Box<dyn Display>);
-
-        results = match i {
+        let results: (Box<dyn Display>, Box<dyn Display>) = match i {
             1 => (
                 Box::new(day_1::get_max_calories(input)),
                 Box::new(day_1::get_sum_top_three_calories(input)),

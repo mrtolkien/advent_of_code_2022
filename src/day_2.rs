@@ -102,8 +102,7 @@ fn parse_row_second_hypothesis(row: &str) -> usize {
     };
 
     Play::iter()
-        .filter(|p| RoundResult::build(&opponent_play, &p) == result)
-        .next()
+        .find(|p| RoundResult::build(&opponent_play, p) == result)
         .expect("Did not find a play that matches the result")
         .value()
         + result.value()

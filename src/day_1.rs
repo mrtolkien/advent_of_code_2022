@@ -15,7 +15,7 @@ pub fn get_max_calories(input: &str) -> usize {
     input
         .split("\n\n")
         .par_bridge()
-        .map(|x| get_calories(x))
+        .map(get_calories)
         .max()
         .expect("No calories found in input {input}")
 }
