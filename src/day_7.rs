@@ -37,8 +37,10 @@ pub fn get_sum_of_small_dir_sizes(input: &str, max_size: usize) -> usize {
             // LS -> We parse the information
             Command::LS => {
                 for line in lines {
-                    match DirValue::build(line) {
-                        DirValue::File(size) => {
+                    let (left_part, _) = line.split_once(' ').unwrap();
+
+                    match left_part.parse::<usize>() {
+                        Ok(size) => {
                             let dir_size = directories
                                 .entry(get_current_dir_name(&cwd))
                                 .or_insert(0 as usize);
@@ -46,7 +48,7 @@ pub fn get_sum_of_small_dir_sizes(input: &str, max_size: usize) -> usize {
                             *dir_size += size;
                         }
                         // We simply pass if we found a dir, we'll match on path names!
-                        DirValue::Dir(_) => (),
+                        Err(_) => (),
                     }
                 }
             }
@@ -67,6 +69,10 @@ pub fn get_sum_of_small_dir_sizes(input: &str, max_size: usize) -> usize {
             result
         }
     })
+
+    // TODO Second part
+    //  -> Total size = sum of sizes
+    //      -> Find min size that is greater than required size
 }
 
 fn get_current_dir_name(current_dir: &Vec<String>) -> String {
@@ -106,25 +112,6 @@ fn parse_command(cmd: &str) -> Command {
     command
 }
 
-#[derive(PartialEq, Debug)]
-enum DirValue {
-    // We just want to know the size
-    File(usize),
-    // We just want to know the name
-    Dir(String),
-}
-
-impl DirValue {
-    fn build(input: &str) -> DirValue {
-        let (left_part, right_part) = input.split_once(' ').unwrap();
-
-        match left_part.parse::<usize>() {
-            Ok(v) => DirValue::File(v),
-            Err(_) => DirValue::Dir(right_part.to_string()),
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -144,13 +131,6 @@ mod tests {
     }
 
     #[test]
-    fn test_build_dir_value() {
-        assert_eq!(DirValue::build("14848514 b.txt"), DirValue::File(14848514));
-        assert_eq!(DirValue::build("8504156 c.dat"), DirValue::File(8504156));
-        assert_eq!(DirValue::build("dir d"), DirValue::Dir("d".to_string()));
-    }
-
-    #[test]
     fn test_print_current_dir() {
         assert_eq!(
             get_current_dir_name(&vec!["/".to_string(), "a".to_string()]),
@@ -165,7 +145,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn test_parse_command_panic() {
-        parse_command("$ test");
+        nom_command("$ test").unwrap();
     }
 
     #[test]
