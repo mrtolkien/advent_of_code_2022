@@ -1,3 +1,13 @@
+use nom::{
+    branch::alt,
+    bytes::complete::tag,
+    character::complete::satisfy,
+    combinator::{map, value},
+    multi::separated_list1,
+    sequence::delimited,
+    IResult,
+};
+
 pub enum CrateMoverVersion {
     V1,
     V2,
@@ -15,12 +25,11 @@ pub enum CrateMoverVersion {
 /// A string containing a comma-separated list of the top crates after all the actions have been performed.
 ///
 /// # Examples
-///
 /// ```
 /// use advent_of_code_2022::day_5::find_top_crates;
 /// use advent_of_code_2022::day_5::CrateMoverVersion;
 ///
-/// let input = "[N] [C]    
+/// let input = "[N] [C]
 ///[Z] [M]
 ///1   2  
 ///
@@ -28,7 +37,6 @@ pub enum CrateMoverVersion {
 ///
 /// assert_eq!(find_top_crates(input, CrateMoverVersion::V1), "CM");
 /// ```
-///
 pub fn find_top_crates(input: &str, version: CrateMoverVersion) -> String {
     let mut data = input.split("\n\n");
 
@@ -43,48 +51,50 @@ pub fn find_top_crates(input: &str, version: CrateMoverVersion) -> String {
         }
     }
 
-    get_top_crates(&mut positions)
+    get_top_crates(&positions)
+}
+
+fn read_starting_position(input: &str) -> Vec<Vec<char>> {
+    let (_, rows) = crate_rows(input).expect("Cannot parse rows: {input}");
+
+    // TODO Better init -> Use a hashmap and entry instead of a Vec
+    let mut result: Vec<Vec<char>> = vec![vec![]; rows[0].len()];
+
+    for row in rows.iter().rev() {
+        for (idx, char) in row.iter().enumerate() {
+            if let Some(c) = char {
+                result[idx].push(*c);
+            }
+        }
+    }
+
+    result
+}
+
+/// Nom parser to parse "[A]" -> 'A'
+fn crate_label(s: &str) -> IResult<&str, char> {
+    let crate_char = satisfy(|c| c.is_ascii_uppercase());
+    delimited(tag("["), crate_char, tag("]"))(s)
+}
+
+/// Nom parser to parse "[A]     [B] [C]" -> [Some('A'), None, Some('B'), Some('C')]
+fn crate_row(s: &str) -> IResult<&str, Vec<Option<char>>> {
+    let maybe_crate = map(crate_label, Some);
+    let empty_space = value(None, tag("   "));
+    let crate_or_empty = alt((maybe_crate, empty_space));
+    separated_list1(tag(" "), crate_or_empty)(s)
+}
+
+/// Nom parser to parse multiple newline-separated rows of crates into a list
+/// of rows, specified by `crate_row`.
+fn crate_rows(s: &str) -> IResult<&str, Vec<Vec<Option<char>>>> {
+    separated_list1(tag("\n"), crate_row)(s)
 }
 
 struct MovementInfo {
     crates_count: usize,
     from: usize,
     to: usize,
-}
-
-fn read_starting_position(input: &str) -> Vec<Vec<char>> {
-    // TODO This is disgusting but it works, clean it up later
-    // -> Try nom: https://docs.rs/nom/latest/nom/
-    let mut reversed_iterator = input.lines().rev();
-
-    // We simply check the width here and init with empty vectors
-    let columns = reversed_iterator
-        .next()
-        .expect("Empty starting position data: {input:?}")
-        .len()
-        / 4
-        + 1;
-
-    let mut result = vec![];
-
-    for _ in 0..columns {
-        result.push(vec![]);
-    }
-
-    for line in reversed_iterator {
-        let line = line.to_owned() + " ";
-
-        let chunked_iterator = line.chars().array_chunks::<4>();
-
-        for (idx, chars) in chunked_iterator.enumerate() {
-            if chars[1] != ' ' {
-                result[idx].push(chars[1]);
-            }
-        }
-    }
-
-    // Get the first line from the bottom for initialization
-    result
 }
 
 fn get_movement_info(row: &str) -> MovementInfo {
@@ -147,14 +157,15 @@ fn move_crates_v2(positions: Vec<Vec<char>>, row: &str) -> Vec<Vec<char>> {
     positions
 }
 
-fn get_top_crates(positions: &mut Vec<Vec<char>>) -> String {
-    let mut result = "".to_string();
-
-    for column in positions {
-        result += column.pop().unwrap().to_string().as_str();
-    }
-
-    result
+fn get_top_crates(positions: &Vec<Vec<char>>) -> String {
+    positions.iter().fold("".to_string(), |result, column| {
+        result
+            + column
+                .last()
+                .expect("No crate on column {column}")
+                .to_string()
+                .as_str()
+    })
 }
 
 #[cfg(test)]
@@ -239,5 +250,37 @@ move 1 from 1 to 2";
             get_top_crates(&mut vec![vec!['Z'], vec!['M', 'C'], vec!['P']]),
             "ZCP"
         );
+    }
+
+    #[test]
+    fn test_crate_rows() {
+        assert_eq!(
+            crate_rows("[A] [B] [C]"),
+            Ok(("", vec![vec![Some('A'), Some('B'), Some('C')]]))
+        );
+        assert_eq!(
+            crate_rows(
+                "[D]     [F]
+[A] [B] [C]"
+            ),
+            Ok((
+                "",
+                vec![
+                    vec![Some('D'), None, Some('F')],
+                    vec![Some('A'), Some('B'), Some('C')]
+                ]
+            ))
+        );
+    }
+
+    #[test]
+    fn test_doctest() {
+        let input = "[N] [C]
+[Z] [M]
+1   2  
+
+move 1 from 2 to 1";
+
+        assert_eq!(find_top_crates(input, CrateMoverVersion::V1), "CM");
     }
 }
