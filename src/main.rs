@@ -48,7 +48,7 @@ fn main() {
             ),
             8 => (
                 Box::new(day_8::get_visible_trees_count(input)),
-                Box::new(day_8::get_visible_trees_count(input)),
+                Box::new(day_8::get_max_scenic_score(input)),
             ),
             // Not panicking helps test it properly
             _ => (
