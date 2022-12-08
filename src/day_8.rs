@@ -1,44 +1,39 @@
 pub fn get_visible_trees_count(input: &str) -> usize {
     let tree_map = create_tree_map(input);
 
-    let mut visible_trees = 0;
-
     let len = tree_map.len();
 
-    for row_idx in 0..len {
-        for col_idx in 0..len {
-            // We pass on borders
-            if col_idx == 0 || row_idx == 0 || col_idx == len - 1 || row_idx == len - 1 {
-                visible_trees += 1;
-                continue;
-            }
+    // Iterate on all rows
+    (0..len)
+        // We map each row to the # of visible trees in the row
+        .map(|row_idx| {
+            // Iterate on column
+            (0..len)
+                // Filter on visible trees and count them
+                .filter(|col_idx| {
+                    let tree_height = tree_map[row_idx][*col_idx];
 
-            let tree_height = tree_map[row_idx][col_idx];
-
-            if
-            // Visible from the left
-            tree_map[row_idx][0..col_idx]
-                .iter()
-                .all(|h| h < &tree_height) ||
-            // Visible from the right
-            tree_map[row_idx][col_idx + 1..len]
+                    // Visible from the left
+                    tree_map[row_idx][0..*col_idx]
+                        .iter()
+                        .all(|h| h < &tree_height) ||
+                    // Visible from the right
+                    tree_map[row_idx][col_idx + 1..len]
                     .iter()
                     .all(|h| h < &tree_height) ||
-            // Visible from above
-            tree_map[0..row_idx]
-                    .iter()
-                    .all(|h| h[col_idx] < tree_height) ||
-            // Visible from below
-            tree_map[row_idx + 1..len]
-                    .iter()
-                    .all(|h| h[col_idx] < tree_height)
-            {
-                visible_trees += 1;
-            }
-        }
-    }
-
-    visible_trees
+                    // Visible from above
+                    tree_map[0..row_idx]
+                            .iter()
+                            .all(|h| h[*col_idx] < tree_height) ||
+                    // Visible from below
+                    tree_map[row_idx + 1..len]
+                            .iter()
+                            .all(|h| h[*col_idx] < tree_height)
+                })
+                .count()
+        })
+        // Sum each row
+        .sum()
 }
 
 pub fn get_max_scenic_score(input: &str) -> usize {
@@ -47,7 +42,7 @@ pub fn get_max_scenic_score(input: &str) -> usize {
     let len = tree_map.len();
     let mut max_score = 0;
 
-    // We put all the borders at 10 to count them as a limit
+    // We put all the borders at 10 to always count them as a limit
     for row_idx in 0..len {
         tree_map[row_idx][0] = 10;
         tree_map[row_idx][len - 1] = 10;
@@ -58,7 +53,7 @@ pub fn get_max_scenic_score(input: &str) -> usize {
         tree_map[len - 1][col_idx] = 10;
     }
 
-    // We check everything except borders (0 anyways)
+    // We check everything except borders (always a score of 0 anyways)
     for row_idx in 1..len - 1 {
         for col_idx in 1..len - 1 {
             let tree_height = &tree_map[row_idx][col_idx];
