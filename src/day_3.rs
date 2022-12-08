@@ -1,6 +1,6 @@
 /// # Panics
 /// Panics if no match is found for a line
-pub fn sum_priorities(input: &str) -> usize {
+#[must_use] pub fn sum_priorities(input: &str) -> usize {
     input.lines().fold(0, |acc, line| {
         let (left, right) = line.split_at(line.len() / 2);
 
@@ -14,7 +14,7 @@ pub fn sum_priorities(input: &str) -> usize {
     })
 }
 
-pub fn sum_triple_priorities(input: &str) -> usize {
+#[must_use] pub fn sum_triple_priorities(input: &str) -> usize {
     input.lines().array_chunks::<3>().fold(0, |acc, lines| {
         for c in lines[0].chars() {
             if lines[1].contains(c) && lines[2].contains(c) {

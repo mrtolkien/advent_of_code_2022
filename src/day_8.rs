@@ -1,4 +1,4 @@
-pub fn get_visible_trees_count(input: &str) -> usize {
+#[must_use] pub fn get_visible_trees_count(input: &str) -> usize {
     let tree_map = create_tree_map(input);
 
     let len = tree_map.len();
@@ -36,7 +36,7 @@ pub fn get_visible_trees_count(input: &str) -> usize {
         .sum()
 }
 
-pub fn get_max_scenic_score(input: &str) -> usize {
+#[must_use] pub fn get_max_scenic_score(input: &str) -> usize {
     let mut tree_map = create_tree_map(input);
 
     let len = tree_map.len();

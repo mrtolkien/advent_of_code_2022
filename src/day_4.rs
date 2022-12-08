@@ -37,7 +37,7 @@ fn get_intervals(line: &str) -> (Interval, Interval) {
 /// let result = fully_overlapping_sections(input);
 /// assert_eq!(result, 1);
 /// ```
-pub fn fully_overlapping_sections(input: &str) -> usize {
+#[must_use] pub fn fully_overlapping_sections(input: &str) -> usize {
     input.lines().fold(0, |acc, line| {
         let (x, y) = get_intervals(line);
 
@@ -49,7 +49,7 @@ pub fn fully_overlapping_sections(input: &str) -> usize {
     })
 }
 
-pub fn overlapping_sections(input: &str) -> usize {
+#[must_use] pub fn overlapping_sections(input: &str) -> usize {
     input.lines().fold(0, |acc, line| {
         let (x, y) = get_intervals(line);
 

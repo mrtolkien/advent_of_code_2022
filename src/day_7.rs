@@ -5,7 +5,7 @@ use nom::sequence::tuple;
 use nom::IResult;
 
 /// Gets a hashmap of path -> files size
-pub fn get_directories(input: &str) -> HashMap<String, usize> {
+#[must_use] pub fn get_directories(input: &str) -> HashMap<String, usize> {
     // cwd will point to the current directory as a vec of dir names
     let mut cwd = Vec::new();
 
@@ -62,7 +62,7 @@ fn get_current_dir_name(current_dir: &[String]) -> String {
 }
 
 /// Gets the sum of the sizes of all directories that are less than `max_size`
-pub fn get_sum_of_small_dir_sizes(input: &str, max_size: usize) -> usize {
+#[must_use] pub fn get_sum_of_small_dir_sizes(input: &str, max_size: usize) -> usize {
     let directories = get_directories(input);
 
     // We check all directories and fold them into a result
@@ -81,7 +81,7 @@ pub fn get_sum_of_small_dir_sizes(input: &str, max_size: usize) -> usize {
     })
 }
 
-pub fn get_smallest_valid_folder_size(
+#[must_use] pub fn get_smallest_valid_folder_size(
     input: &str,
     total_space: usize,
     required_space: usize,
@@ -164,11 +164,11 @@ mod tests {
     #[test]
     fn test_print_current_dir() {
         assert_eq!(
-            get_current_dir_name(&vec!["/".to_string(), "a".to_string()]),
+            get_current_dir_name(&["/".to_string(), "a".to_string()]),
             "/a"
         );
         assert_eq!(
-            get_current_dir_name(&vec!["/".to_string(), "a".to_string(), "b".to_string()]),
+            get_current_dir_name(&["/".to_string(), "a".to_string(), "b".to_string()]),
             "/a/b"
         );
     }
@@ -188,7 +188,7 @@ mod tests {
     fn test_second_part() {
         assert_eq!(
             get_smallest_valid_folder_size(DEMO_INPUT, 70_000_000, 30_000_000),
-            24933642
+            24_933_642
         )
     }
 

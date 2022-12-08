@@ -108,13 +108,13 @@ fn parse_row_second_hypothesis(row: &str) -> usize {
         + result.value()
 }
 
-pub fn calculate_score_first_method(input: &str) -> usize {
+#[must_use] pub fn calculate_score_first_method(input: &str) -> usize {
     input
         .lines()
         .fold(0, |acc, x| acc + parse_row_first_hypothesis(x))
 }
 
-pub fn calculate_score_second_method(input: &str) -> usize {
+#[must_use] pub fn calculate_score_second_method(input: &str) -> usize {
     input
         .lines()
         .fold(0, |acc, x| acc + parse_row_second_hypothesis(x))

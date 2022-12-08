@@ -40,7 +40,7 @@ pub enum CrateMoverVersion {
 ///
 /// assert_eq!(find_top_crates(input, CrateMoverVersion::V1), "CM");
 /// ```
-pub fn find_top_crates(input: &str, version: &CrateMoverVersion) -> String {
+#[must_use] pub fn find_top_crates(input: &str, version: &CrateMoverVersion) -> String {
     let mut data = input.split("\n\n");
 
     // This gets the starting block

@@ -18,7 +18,7 @@ use std::collections::VecDeque;
 /// assert_eq!(get_packet_start("AAABC", 3), 5);
 /// assert_eq!(get_packet_start("ABCCDEF", 4), 7);
 /// ```
-pub fn get_packet_start(input: &str, distinct_letters: usize) -> usize {
+#[must_use] pub fn get_packet_start(input: &str, distinct_letters: usize) -> usize {
     let mut last_chars = VecDeque::new();
 
     for (idx, current_char) in input.chars().enumerate() {

@@ -20,7 +20,7 @@ pub fn get_max_calories(input: &str) -> usize {
         .expect("No calories found in input {input}")
 }
 
-pub fn get_sum_top_three_calories(input: &str) -> usize {
+#[must_use] pub fn get_sum_top_three_calories(input: &str) -> usize {
     // We'll keep this sorted
     let mut top_3_calories: Vec<usize> = vec![0, 0, 0];
 
