@@ -180,7 +180,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn test_parse_command_panic() {
-        nom_command("$ test").unwrap();
+        nom_command("test").unwrap();
     }
 
     #[test]
