@@ -1,3 +1,6 @@
+use std::collections::HashMap;
+
+use itertools::Itertools;
 use nom::{
     branch::alt,
     bytes::complete::tag,
@@ -46,24 +49,24 @@ pub fn find_top_crates(input: &str, version: CrateMoverVersion) -> String {
     // We then iterate on the rows
     for row in data.next().expect("No actions founds").lines() {
         match version {
-            CrateMoverVersion::V1 => positions = move_crates(positions, row),
-            CrateMoverVersion::V2 => positions = move_crates_v2(positions, row),
+            CrateMoverVersion::V1 => move_crates(&mut positions, row),
+            CrateMoverVersion::V2 => move_crates_v2(&mut positions, row),
         }
     }
 
     get_top_crates(&positions)
 }
 
-fn read_starting_position(input: &str) -> Vec<Vec<char>> {
+fn read_starting_position(input: &str) -> HashMap<usize, Vec<char>> {
     let (_, rows) = crate_rows(input).expect("Cannot parse rows: {input}");
 
-    // TODO Better init -> Use a hashmap and entry instead of a Vec
-    let mut result: Vec<Vec<char>> = vec![vec![]; rows[0].len()];
+    let mut result = HashMap::new();
 
     for row in rows.iter().rev() {
         for (idx, char) in row.iter().enumerate() {
             if let Some(c) = char {
-                result[idx].push(*c);
+                let column = result.entry(idx + 1).or_insert(Vec::new());
+                column.push(*c);
             }
         }
     }
@@ -120,52 +123,61 @@ fn get_movement_info(row: &str) -> MovementInfo {
     }
 }
 
-fn move_crates(positions: Vec<Vec<char>>, row: &str) -> Vec<Vec<char>> {
-    // TODO This does a copy? -> Understand the line
-    let mut positions = positions;
-
+fn move_crates(positions: &mut HashMap<usize, Vec<char>>, row: &str) {
     let movement_info = get_movement_info(row);
 
     let mut moving_crates = vec![];
 
     for _ in 0..movement_info.crates_count {
-        moving_crates.push(positions[movement_info.from - 1].pop().unwrap());
+        moving_crates.push(
+            positions
+                .get_mut(&(movement_info.from))
+                .unwrap()
+                .pop()
+                .unwrap(),
+        );
     }
 
     for crate_ in moving_crates {
-        positions[movement_info.to - 1].push(crate_);
+        positions.get_mut(&(movement_info.to)).unwrap().push(crate_);
     }
-
-    positions
 }
 
-fn move_crates_v2(positions: Vec<Vec<char>>, row: &str) -> Vec<Vec<char>> {
-    let mut positions = positions;
-
+fn move_crates_v2(positions: &mut HashMap<usize, Vec<char>>, row: &str) {
     let movement_info = get_movement_info(row);
 
     let mut moving_crates = vec![];
 
     for _ in 0..movement_info.crates_count {
-        moving_crates.push(positions[movement_info.from - 1].pop().unwrap());
+        moving_crates.push(
+            positions
+                .get_mut(&(movement_info.from))
+                .unwrap()
+                .pop()
+                .unwrap(),
+        );
     }
 
     for crate_ in moving_crates.iter().rev() {
-        positions[movement_info.to - 1].push(*crate_);
+        positions
+            .get_mut(&(movement_info.to))
+            .unwrap()
+            .push(*crate_);
     }
-
-    positions
 }
 
-fn get_top_crates(positions: &[Vec<char>]) -> String {
-    positions.iter().fold("".to_string(), |result, column| {
-        result
-            + column
-                .last()
-                .expect("No crate on column {column}")
-                .to_string()
-                .as_str()
-    })
+fn get_top_crates(positions: &HashMap<usize, Vec<char>>) -> String {
+    positions
+        .iter()
+        .sorted_by(|a, b| Ord::cmp(&a.0, &b.0))
+        .fold("".to_string(), |result, (_, column)| {
+            result
+                + column
+                    .last()
+                    .expect("No crate on column {column}")
+                    .to_string()
+                    .as_str()
+        })
 }
 
 #[cfg(test)]
@@ -198,7 +210,7 @@ move 1 from 1 to 2";
                 "[D]
  1"
             ),
-            vec![vec!['D']]
+            HashMap::from([(1, vec!['D'])])
         );
 
         assert_eq!(
@@ -208,48 +220,73 @@ move 1 from 1 to 2";
 [Z] [M] [P]
  1   2   3 "
             ),
-            vec![vec!['Z', 'N'], vec!['M', 'C', 'D'], vec!['P']]
+            HashMap::from([
+                (1, vec!['Z', 'N']),
+                (2, vec!['M', 'C', 'D']),
+                (3, vec!['P'])
+            ])
         );
     }
 
     #[test]
     fn test_move() {
-        assert_eq!(
-            move_crates(
-                vec![vec!['Z', 'N'], vec!['M', 'C', 'D'], vec!['P']],
-                "move 1 from 2 to 1",
-            ),
-            vec![vec!['Z', 'N', 'D'], vec!['M', 'C'], vec!['P']]
-        );
+        let mut positions = HashMap::from([
+            (1, vec!['Z', 'N']),
+            (2, vec!['M', 'C', 'D']),
+            (3, vec!['P']),
+        ]);
+
+        move_crates(&mut positions, "move 1 from 2 to 1");
 
         assert_eq!(
-            move_crates(
-                vec![vec!['Z', 'N'], vec!['M', 'C', 'D'], vec!['P']],
-                "move 2 from 2 to 3",
-            ),
-            vec![vec!['Z', 'N'], vec!['M'], vec!['P', 'D', 'C']]
+            positions,
+            HashMap::from([
+                (1, vec!['Z', 'N', 'D']),
+                (2, vec!['M', 'C']),
+                (3, vec!['P']),
+            ])
         );
 
+        move_crates(&mut positions, "move 2 from 2 to 3");
+
         assert_eq!(
-            move_crates(
-                vec![vec!['Z', 'N'], vec!['M', 'C', 'D'], vec!['P']],
-                "move 2 from 1 to 3",
-            ),
-            vec![vec![], vec!['M', 'C', 'D'], vec!['P', 'N', 'Z']]
+            positions,
+            HashMap::from([
+                (1, vec!['Z', 'N', 'D']),
+                (2, vec![]),
+                (3, vec!['P', 'C', 'M']),
+            ])
+        );
+
+        move_crates(&mut positions, "move 2 from 1 to 3");
+
+        assert_eq!(
+            positions,
+            HashMap::from([
+                (1, vec!['Z']),
+                (2, vec![]),
+                (3, vec!['P', 'C', 'M', 'D', 'N']),
+            ])
         );
     }
 
     #[test]
     fn test_get_top_crates() {
-        assert_eq!(
-            get_top_crates(&mut vec![vec!['Z', 'N', 'D'], vec!['M', 'C'], vec!['P']]),
-            "DCP"
-        );
+        let positions = HashMap::from([
+            (1, vec!['D', 'D', 'D']),
+            (2, vec!['C', 'C']),
+            (3, vec!['P']),
+        ]);
 
-        assert_eq!(
-            get_top_crates(&mut vec![vec!['Z'], vec!['M', 'C'], vec!['P']]),
-            "ZCP"
-        );
+        assert_eq!(get_top_crates(&positions), "DCP");
+
+        let positions = HashMap::from([
+            (1, vec!['Z']),
+            (2, vec!['C', 'C', 'C', 'C']),
+            (3, vec!['P']),
+        ]);
+
+        assert_eq!(get_top_crates(&positions), "ZCP");
     }
 
     #[test]
