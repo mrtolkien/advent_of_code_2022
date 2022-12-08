@@ -4,8 +4,8 @@ use nom::character::complete::{alpha1, space0};
 use nom::sequence::tuple;
 use nom::IResult;
 
-/// Gets the sum of the sizes of all directories that are less than max_size
-pub fn get_sum_of_small_dir_sizes(input: &str, max_size: usize) -> usize {
+/// Gets a hashmap of path -> files size
+pub fn get_directories(input: &str) -> HashMap<String, usize> {
     // cwd will point to the current directory as a vec of dir names
     let mut cwd = Vec::new();
 
@@ -55,9 +55,23 @@ pub fn get_sum_of_small_dir_sizes(input: &str, max_size: usize) -> usize {
         }
     }
 
+    directories
+}
+
+fn get_current_dir_name(current_dir: &Vec<String>) -> String {
+    current_dir
+        .iter()
+        .skip(1) // Skipping the / at the beginning of all
+        .fold(String::new(), |acc, x| acc + "/" + x)
+}
+
+/// Gets the sum of the sizes of all directories that are less than max_size
+pub fn get_sum_of_small_dir_sizes(input: &str, max_size: usize) -> usize {
+    let directories = get_directories(input);
+
     // We check all directories and fold them into a result
     directories.keys().fold(0, |result, dir_name| {
-        // We check each directory size by recursively checking its children
+        // We get the directory size by recursively checking its children
         let size = directories
             .iter()
             .filter(|(name, _)| name.starts_with(dir_name))
@@ -69,17 +83,38 @@ pub fn get_sum_of_small_dir_sizes(input: &str, max_size: usize) -> usize {
             result
         }
     })
-
-    // TODO Second part
-    //  -> Total size = sum of sizes
-    //      -> Find min size that is greater than required size
 }
 
-fn get_current_dir_name(current_dir: &Vec<String>) -> String {
-    current_dir
-        .iter()
-        .skip(1) // Skipping the / at the beginning of all
-        .fold(String::new(), |acc, x| acc + "/" + x)
+pub fn get_smallest_valid_folder_size(
+    input: &str,
+    total_space: usize,
+    required_space: usize,
+) -> usize {
+    let directories = get_directories(input);
+
+    let total_used_space: usize = directories.values().sum();
+
+    // We check all directories and fold them into a result
+    directories
+        .keys()
+        // We first compute the size
+        .map(|dir_name| {
+            // We get the directory size by recursively checking its children
+            directories
+                .iter()
+                .filter(|(name, _)| name.starts_with(dir_name))
+                .fold(0, |size, (_, child_size)| size + child_size)
+        })
+        .filter(|size| {
+            // total_used_space - current_dir_size = size used after potential deletion
+            total_used_space - size 
+            // We need this to be *smaller* than the maximum size we're allowed
+            < 
+            // total_space - required_space = maximum size we can use
+            total_space - required_space
+        })
+        .min()
+        .expect("No suitable directory found")
 }
 
 #[derive(PartialEq, Debug)]
@@ -151,6 +186,14 @@ mod tests {
     #[test]
     fn test_first_part() {
         assert_eq!(get_sum_of_small_dir_sizes(DEMO_INPUT, 100_000), 95_437);
+    }
+
+    #[test]
+    fn test_second_part() {
+        assert_eq!(
+            get_smallest_valid_folder_size(DEMO_INPUT, 70_000_000, 30_000_000),
+            24933642
+        )
     }
 
     const DEMO_INPUT: &str = "$ cd /

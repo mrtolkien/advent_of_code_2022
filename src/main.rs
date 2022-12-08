@@ -42,7 +42,9 @@ fn main() {
             ),
             7 => (
                 Box::new(day_7::get_sum_of_small_dir_sizes(input, 100_000)),
-                Box::new(day_7::get_sum_of_small_dir_sizes(input, 100_000)),
+                Box::new(day_7::get_smallest_valid_folder_size(
+                    input, 70_000_000, 30_000_000,
+                )),
             ),
             // Not panicking helps test it properly
             _ => (
