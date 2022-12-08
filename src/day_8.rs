@@ -40,9 +40,9 @@ pub fn get_max_scenic_score(input: &str) -> usize {
     let mut tree_map = create_tree_map(input);
 
     let len = tree_map.len();
-    let mut max_score = 0;
 
     // We put all the borders at 10 to always count them as a limit
+    // A bit dirty but it makes it much simpler as there's no take_until function in std or itertools
     for row_idx in 0..len {
         tree_map[row_idx][0] = 10;
         tree_map[row_idx][len - 1] = 10;
@@ -54,46 +54,50 @@ pub fn get_max_scenic_score(input: &str) -> usize {
     }
 
     // We check everything except borders (always a score of 0 anyways)
-    for row_idx in 1..len - 1 {
-        for col_idx in 1..len - 1 {
-            let tree_height = &tree_map[row_idx][col_idx];
+    (1..len - 1)
+        // We map each row to its maximum score
+        .map(|row_idx| {
+            (1..len - 1)
+                // We map each column to its score then use max() on it
+                .map(|col_idx| {
+                    let tree_height = &tree_map[row_idx][col_idx];
 
-            // This stops at most at the border, and we add 1 as we always see at least 1 tree
-            let left_score = tree_map[row_idx][0..col_idx]
-                .iter()
-                .rev()
-                .take_while(|h| h < &tree_height)
-                .count()
-                + 1;
+                    // This stops at most at the border, and we add 1 as we always see at least 1 tree
+                    let left_score = tree_map[row_idx][0..col_idx]
+                        .iter()
+                        .rev()
+                        .take_while(|h| h < &tree_height)
+                        .count()
+                        + 1;
 
-            let right_score = tree_map[row_idx][col_idx + 1..len]
-                .iter()
-                .take_while(|h| h < &tree_height)
-                .count()
-                + 1;
+                    let right_score = tree_map[row_idx][col_idx + 1..len]
+                        .iter()
+                        .take_while(|h| h < &tree_height)
+                        .count()
+                        + 1;
 
-            let top_score = tree_map[0..row_idx]
-                .iter()
-                .rev()
-                .take_while(|h| h[col_idx] < *tree_height)
-                .count()
-                + 1;
+                    let top_score = tree_map[0..row_idx]
+                        .iter()
+                        .rev()
+                        .take_while(|h| h[col_idx] < *tree_height)
+                        .count()
+                        + 1;
 
-            let bottom_score = tree_map[row_idx + 1..len]
-                .iter()
-                .take_while(|h| h[col_idx] < *tree_height)
-                .count()
-                + 1;
+                    let bottom_score = tree_map[row_idx + 1..len]
+                        .iter()
+                        .take_while(|h| h[col_idx] < *tree_height)
+                        .count()
+                        + 1;
 
-            let score = left_score * right_score * top_score * bottom_score;
-
-            if score > max_score {
-                max_score = score;
-            }
-        }
-    }
-
-    max_score
+                    left_score * right_score * top_score * bottom_score
+                })
+                // Maxing on the column
+                .max()
+                .expect("No max found in column {col_idx}")
+        })
+        // Maxing on the row
+        .max()
+        .expect("No max found for input {tree_map}")
 }
 
 fn create_tree_map(input: &str) -> Vec<Vec<u8>> {
