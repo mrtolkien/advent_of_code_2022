@@ -4,11 +4,11 @@ struct Interval {
 }
 
 impl Interval {
-    fn contains(&self, other_interval: &Interval) -> bool {
+    const fn contains(&self, other_interval: &Self) -> bool {
         self.start <= other_interval.start && other_interval.end <= self.end
     }
 
-    fn overlap(&self, other_interval: &Interval) -> bool {
+    const fn overlap(&self, other_interval: &Self) -> bool {
         // Smart solution:
         // https://stackoverflow.com/questions/3269434/whats-the-most-efficient-way-to-test-if-two-ranges-overlap
         self.start <= other_interval.end && other_interval.start <= self.end

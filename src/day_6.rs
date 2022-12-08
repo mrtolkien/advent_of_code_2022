@@ -29,16 +29,16 @@ pub fn get_packet_start(input: &str, distinct_letters: usize) -> usize {
         // This uses Rust itertools
         if last_chars.len() < distinct_letters {
             continue;
-        } else {
-            // We check if we have distinct_letters different characters
-            if last_chars.iter().unique().count() == distinct_letters {
-                // Index starts at one 😱
-                return idx + 1;
-            }
-
-            // Otherwise we pop the first value and continue
-            last_chars.pop_front();
         }
+
+        // We check if we have distinct_letters different characters
+        if last_chars.iter().unique().count() == distinct_letters {
+            // Index starts at one 😱
+            return idx + 1;
+        }
+
+        // Otherwise we pop the first value and continue
+        last_chars.pop_front();
     }
 
     panic!("No packet marker found in input: {input:?}");

@@ -1,3 +1,5 @@
+/// # Panics
+/// Panics if no match is found for a line
 pub fn sum_priorities(input: &str) -> usize {
     input.lines().fold(0, |acc, line| {
         let (left, right) = line.split_at(line.len() / 2);
@@ -28,10 +30,11 @@ pub fn sum_triple_priorities(input: &str) -> usize {
 const ALPHABET: &str = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 fn get_priority(c: char) -> usize {
-    match ALPHABET.chars().into_iter().position(|x| x == c) {
-        Some(x) => x,
-        None => panic!("Unknown char: {c}"),
-    }
+    ALPHABET
+        .chars()
+        .into_iter()
+        .position(|x| x == c)
+        .map_or_else(|| panic!("Unknown char: {c}"), |x| x)
 }
 
 #[cfg(test)]

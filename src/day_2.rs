@@ -11,20 +11,20 @@ enum Play {
 
 impl Play {
     /// Returns what this [`Play`] beats
-    fn beats(&self) -> &Play {
+    const fn beats(&self) -> &'static Self {
         match self {
-            Play::Rock => &Play::Scissors,
-            Play::Paper => &Play::Rock,
-            Play::Scissors => &Play::Paper,
+            Self::Rock => &Self::Scissors,
+            Self::Paper => &Self::Rock,
+            Self::Scissors => &Self::Paper,
         }
     }
 
     /// Returns the point value of this [`Play`]
-    fn value(&self) -> usize {
+    const fn value(self) -> usize {
         match self {
-            Play::Rock => 1,
-            Play::Paper => 2,
-            Play::Scissors => 3,
+            Self::Rock => 1,
+            Self::Paper => 2,
+            Self::Scissors => 3,
         }
     }
 }
@@ -37,22 +37,22 @@ enum RoundResult {
 }
 
 impl RoundResult {
-    fn value(&self) -> usize {
+    const fn value(&self) -> usize {
         match self {
-            RoundResult::Win => 6,
-            RoundResult::Draw => 3,
-            RoundResult::Lose => 0,
+            Self::Win => 6,
+            Self::Draw => 3,
+            Self::Lose => 0,
         }
     }
 
-    fn build(opponent_play: &Play, my_play: &Play) -> RoundResult {
+    fn build(opponent_play: &Play, my_play: &Play) -> Self {
         if my_play.beats() == opponent_play {
-            RoundResult::Win
+            Self::Win
         } else if opponent_play.beats() == my_play {
-            RoundResult::Lose
+            Self::Lose
         } else {
             assert_eq!(opponent_play, my_play);
-            RoundResult::Draw
+            Self::Draw
         }
     }
 }

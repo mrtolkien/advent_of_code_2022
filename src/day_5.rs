@@ -40,7 +40,7 @@ pub enum CrateMoverVersion {
 ///
 /// assert_eq!(find_top_crates(input, CrateMoverVersion::V1), "CM");
 /// ```
-pub fn find_top_crates(input: &str, version: CrateMoverVersion) -> String {
+pub fn find_top_crates(input: &str, version: &CrateMoverVersion) -> String {
     let mut data = input.split("\n\n");
 
     // This gets the starting block
@@ -65,7 +65,7 @@ fn read_starting_position(input: &str) -> HashMap<usize, Vec<char>> {
     for row in rows.iter().rev() {
         for (idx, char) in row.iter().enumerate() {
             if let Some(c) = char {
-                let column = result.entry(idx + 1).or_insert(Vec::new());
+                let column: &mut Vec<char> = result.entry(idx + 1).or_default();
                 column.push(*c);
             }
         }
@@ -170,7 +170,7 @@ fn get_top_crates(positions: &HashMap<usize, Vec<char>>) -> String {
     positions
         .iter()
         .sorted_by(|a, b| Ord::cmp(&a.0, &b.0))
-        .fold("".to_string(), |result, (_, column)| {
+        .fold(String::new(), |result, (_, column)| {
             result
                 + column
                     .last()
@@ -196,12 +196,12 @@ move 1 from 1 to 2";
 
     #[test]
     fn test_first_part() {
-        assert_eq!(find_top_crates(DEMO_INPUT, CrateMoverVersion::V1), "CMZ");
+        assert_eq!(find_top_crates(DEMO_INPUT, &CrateMoverVersion::V1), "CMZ");
     }
 
     #[test]
     fn test_second_part() {
-        assert_eq!(find_top_crates(DEMO_INPUT, CrateMoverVersion::V2), "MCD");
+        assert_eq!(find_top_crates(DEMO_INPUT, &CrateMoverVersion::V2), "MCD");
     }
     #[test]
     fn test_starting_position() {
@@ -318,6 +318,6 @@ move 1 from 1 to 2";
 
 move 1 from 2 to 1";
 
-        assert_eq!(find_top_crates(input, CrateMoverVersion::V1), "CM");
+        assert_eq!(find_top_crates(input, &CrateMoverVersion::V1), "CM");
     }
 }

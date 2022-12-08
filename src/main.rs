@@ -5,7 +5,7 @@ fn get_day_input(day: u8) -> String {
     let file_name = format!("data/day_{day}.txt");
 
     // We simply don't return anything if the file doesn't exist
-    fs::read_to_string(file_name).unwrap_or("".to_string())
+    fs::read_to_string(file_name).unwrap_or_default()
 }
 
 fn main() {
@@ -33,8 +33,8 @@ fn main() {
                 Box::new(day_4::overlapping_sections(input)),
             ),
             5 => (
-                Box::new(day_5::find_top_crates(input, day_5::CrateMoverVersion::V1)),
-                Box::new(day_5::find_top_crates(input, day_5::CrateMoverVersion::V2)),
+                Box::new(day_5::find_top_crates(input, &day_5::CrateMoverVersion::V1)),
+                Box::new(day_5::find_top_crates(input, &day_5::CrateMoverVersion::V2)),
             ),
             6 => (
                 Box::new(day_6::get_packet_start(input, 4)),

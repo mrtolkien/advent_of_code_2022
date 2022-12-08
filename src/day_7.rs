@@ -61,7 +61,7 @@ fn get_current_dir_name(current_dir: &[String]) -> String {
         .fold(String::new(), |acc, x| acc + "/" + x)
 }
 
-/// Gets the sum of the sizes of all directories that are less than max_size
+/// Gets the sum of the sizes of all directories that are less than `max_size`
 pub fn get_sum_of_small_dir_sizes(input: &str, max_size: usize) -> usize {
     let directories = get_directories(input);
 

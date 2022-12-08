@@ -43,7 +43,7 @@ pub fn get_max_scenic_score(input: &str) -> usize {
 
     // We put all the borders at 10 to always count them as a limit
     // A bit dirty but it makes it much simpler as there's no take_until function in std or itertools
-    for row in tree_map.iter_mut() {
+    for row in &mut tree_map {
         row[0] = 10;
         row[len - 1] = 10;
     }
