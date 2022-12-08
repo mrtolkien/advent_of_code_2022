@@ -1,6 +1,7 @@
 /// # Panics
 /// Panics if no match is found for a line
-#[must_use] pub fn sum_priorities(input: &str) -> usize {
+#[must_use]
+pub fn sum_priorities(input: &str) -> usize {
     input.lines().fold(0, |acc, line| {
         let (left, right) = line.split_at(line.len() / 2);
 
@@ -14,7 +15,8 @@
     })
 }
 
-#[must_use] pub fn sum_triple_priorities(input: &str) -> usize {
+#[must_use]
+pub fn sum_triple_priorities(input: &str) -> usize {
     input.lines().array_chunks::<3>().fold(0, |acc, lines| {
         for c in lines[0].chars() {
             if lines[1].contains(c) && lines[2].contains(c) {
@@ -71,13 +73,13 @@ CrZsJsPPZsGzwwsLwLmpwMDw";
     #[test]
     #[should_panic]
     fn test_sum_panic() {
-        sum_priorities("AB");
+        let _ = sum_priorities("AB");
     }
 
     #[test]
     #[should_panic]
     fn test_triple_sum_panic() {
-        sum_triple_priorities(
+        let _ = sum_triple_priorities(
             "AB
 CD
 FG",

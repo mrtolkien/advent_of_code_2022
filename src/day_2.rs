@@ -108,13 +108,15 @@ fn parse_row_second_hypothesis(row: &str) -> usize {
         + result.value()
 }
 
-#[must_use] pub fn calculate_score_first_method(input: &str) -> usize {
+#[must_use]
+pub fn calculate_score_first_method(input: &str) -> usize {
     input
         .lines()
         .fold(0, |acc, x| acc + parse_row_first_hypothesis(x))
 }
 
-#[must_use] pub fn calculate_score_second_method(input: &str) -> usize {
+#[must_use]
+pub fn calculate_score_second_method(input: &str) -> usize {
     input
         .lines()
         .fold(0, |acc, x| acc + parse_row_second_hypothesis(x))
@@ -146,14 +148,14 @@ C Z";
     #[test]
     #[should_panic]
     fn test_calculate_score_second_method_panic() {
-        calculate_score_second_method("A A");
+        let _ = calculate_score_second_method("A A");
     }
 
     // Testing that we make the first method panic
     #[test]
     #[should_panic]
     fn test_calculate_score_first_method_panic() {
-        calculate_score_first_method("A A");
+        let _ = calculate_score_first_method("A A");
     }
 
     // Testing that we make the opponent play parser panic
