@@ -1,4 +1,4 @@
-use advent_of_code_2022::{day_1, day_2, day_3, day_4, day_5, day_6, day_7};
+use advent_of_code_2022::{day_1, day_2, day_3, day_4, day_5, day_6, day_7, day_8};
 use std::{fmt::Display, fs};
 
 fn get_day_input(day: u8) -> String {
@@ -9,7 +9,7 @@ fn get_day_input(day: u8) -> String {
 }
 
 fn main() {
-    for i in 1..=8 {
+    for i in 1..=9 {
         // We read the input from the file
         let input = get_day_input(i);
         let input = input.as_str();
@@ -45,6 +45,10 @@ fn main() {
                 Box::new(day_7::get_smallest_valid_folder_size(
                     input, 70_000_000, 30_000_000,
                 )),
+            ),
+            8 => (
+                Box::new(day_8::get_visible_trees_count(input)),
+                Box::new(day_8::get_visible_trees_count(input)),
             ),
             // Not panicking helps test it properly
             _ => (
