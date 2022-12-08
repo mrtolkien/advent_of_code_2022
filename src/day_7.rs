@@ -17,7 +17,7 @@ pub fn get_directories(input: &str) -> HashMap<String, usize> {
     for command_input in input.split("$ ") {
         // TODO This is once again disgusting but I want to get it done... I think nom can do that better
         // -> The first split matches to "" since it starts with the pattern
-        if command_input == "" {
+        if command_input.is_empty() {
             continue;
         }
 
@@ -39,16 +39,12 @@ pub fn get_directories(input: &str) -> HashMap<String, usize> {
                 for line in lines {
                     let (left_part, _) = line.split_once(' ').unwrap();
 
-                    match left_part.parse::<usize>() {
-                        Ok(size) => {
+                    if let Ok(size) = left_part.parse::<usize>() {
                             let dir_size = directories
                                 .entry(get_current_dir_name(&cwd))
-                                .or_insert(0 as usize);
+                                .or_insert(0_usize);
 
                             *dir_size += size;
-                        }
-                        // We simply pass if we found a dir, we'll match on path names!
-                        Err(_) => (),
                     }
                 }
             }
@@ -58,7 +54,7 @@ pub fn get_directories(input: &str) -> HashMap<String, usize> {
     directories
 }
 
-fn get_current_dir_name(current_dir: &Vec<String>) -> String {
+fn get_current_dir_name(current_dir: &[String]) -> String {
     current_dir
         .iter()
         .skip(1) // Skipping the / at the beginning of all
