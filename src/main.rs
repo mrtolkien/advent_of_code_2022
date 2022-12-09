@@ -1,4 +1,4 @@
-use advent_of_code_2022::{day_1, day_2, day_3, day_4, day_5, day_6, day_7, day_8};
+use advent_of_code_2022::{day_1, day_2, day_3, day_4, day_5, day_6, day_7, day_8, day_9};
 use std::{fmt::Display, fs};
 
 fn get_day_input(day: u8) -> String {
@@ -9,7 +9,7 @@ fn get_day_input(day: u8) -> String {
 }
 
 fn main() {
-    for i in 1..=9 {
+    for i in 1..=10 {
         // We read the input from the file
         let input = get_day_input(i);
         let input = input.as_str();
@@ -49,6 +49,10 @@ fn main() {
             8 => (
                 Box::new(day_8::get_visible_trees_count(input)),
                 Box::new(day_8::get_max_scenic_score(input)),
+            ),
+            9 => (
+                Box::new(day_9::get_visited_positions_short_rope(input)),
+                Box::new(day_9::get_visited_positions_long_rope(input)),
             ),
             // Not panicking helps test it properly
             _ => (
