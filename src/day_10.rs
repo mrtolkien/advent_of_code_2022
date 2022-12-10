@@ -33,6 +33,8 @@ pub fn get_signal_strength_sum(input: &str) -> isize {
 }
 
 pub fn get_drawing(input: &str) -> String {
+    // TODO Fix code duplication in a beautiful way with a struct holding the current state
+
     // This is the register's value
     let mut register_value = 1;
 
@@ -288,12 +290,6 @@ noop";
 ######......######......######......####
 #######.......#######.......#######.....
 ";
-
-        // TODO REMOVE
-        println!("{drawing}");
-        println!("///////////////////////////////////////");
-        println!(".");
-        println!("{result}");
 
         assert_eq!(drawing, result)
     }
