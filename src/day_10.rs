@@ -4,44 +4,43 @@ enum Command {
     AddX(isize),
 }
 
-pub fn get_signal_strength_sum(input: &str) -> isize {
-    // This is the register's value
-    let mut register_value = 1;
+struct State {
+    register_value: isize,
+    add_x_started: bool,
+    commands: Vec<Command>,
+    command_index: usize,
+}
 
-    let mut add_x_start = false;
+impl State {
+    fn new(raw_commands: &str) -> Self {
+        Self {
+            register_value: 1,
+            add_x_started: false,
+            commands: raw_commands.lines().map(parse_command).collect(),
+            command_index: 0,
+        }
+    }
+}
 
-    let mut commands = input.lines().map(parse_command).into_iter();
-    let mut command = commands.next().unwrap();
+pub fn get_signal_strength_sum(raw_commands: &str) -> isize {
+    let mut state = State::new(raw_commands);
 
     let mut result = 0;
 
     for cycle in 1..=220 {
         // We get the 20th cycle's value and every 40th cycle after that
         if (cycle - 20) % 40 == 0 {
-            result += register_value * cycle;
+            result += state.register_value * cycle;
         }
 
-        apply_command(
-            &mut command,
-            &mut commands,
-            &mut add_x_start,
-            &mut register_value,
-        );
+        state = apply_command(state);
     }
 
     result
 }
 
-pub fn get_drawing(input: &str) -> String {
-    // TODO Fix code duplication in a beautiful way with a struct holding the current state
-
-    // This is the register's value
-    let mut register_value = 1;
-
-    let mut add_x_start = false;
-
-    let mut commands = input.lines().map(parse_command).into_iter();
-    let mut command = commands.next().unwrap();
+pub fn get_drawing(raw_commands: &str) -> String {
+    let mut state = State::new(raw_commands);
 
     let mut result = String::new();
 
@@ -49,9 +48,9 @@ pub fn get_drawing(input: &str) -> String {
         let pixel_position = (cycle - 1) % 40;
 
         // We check if we should draw a pixel at position cycle - 1
-        if pixel_position == register_value - 1
-            || pixel_position == register_value
-            || pixel_position == register_value + 1
+        if pixel_position == state.register_value - 1
+            || pixel_position == state.register_value
+            || pixel_position == state.register_value + 1
         {
             result.push_str("#");
         // Else we draw a dot
@@ -59,12 +58,7 @@ pub fn get_drawing(input: &str) -> String {
             result.push_str(".");
         }
 
-        apply_command(
-            &mut command,
-            &mut commands,
-            &mut add_x_start,
-            &mut register_value,
-        );
+        state = apply_command(state);
 
         // We add a line jump every 40 commands
         if pixel_position == 39 {
@@ -75,27 +69,29 @@ pub fn get_drawing(input: &str) -> String {
     result
 }
 
-fn apply_command(
-    command: &mut Command,
-    commands: &mut impl Iterator<Item = Command>,
-    add_x_start: &mut bool,
-    register_value: &mut isize,
-) {
+fn apply_command(state: State) -> State {
+    let command = &state.commands[state.command_index];
+
     match *command {
         // No operation -> We get the next command
-        Command::NoOp => *command = commands.next().unwrap(),
+        Command::NoOp => State {
+            command_index: state.command_index + 1,
+            ..state
+        },
         // AddX
-        Command::AddX(v) => match *add_x_start {
+        Command::AddX(v) => match state.add_x_started {
             // First cycle -> we change the bool to say we started
-            false => {
-                *add_x_start = true;
-            }
-            // Second cycle -> we change register value and reset
-            true => {
-                *register_value += v;
-                *add_x_start = false;
-                *command = commands.next().unwrap();
-            }
+            false => State {
+                add_x_started: true,
+                ..state
+            },
+            // Second cycle -> we change register value and reset the bool
+            true => State {
+                register_value: state.register_value + v,
+                add_x_started: false,
+                command_index: state.command_index + 1,
+                ..state
+            },
         },
     }
 }
