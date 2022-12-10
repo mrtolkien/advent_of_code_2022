@@ -1,7 +1,5 @@
 use std::collections::HashSet;
 
-use itertools::Itertools;
-
 #[derive(Debug, PartialEq, Hash, Eq, Clone, Copy)]
 struct Position {
     x: i32,
@@ -32,9 +30,11 @@ pub fn get_visited_positions_short_rope(input: &str) -> usize {
     visited_locations.insert(tail_position.clone());
 
     for motion in motions {
-        // TODO Learn how to *not* modify the objects!
         for _ in 0..motion.distance {
-            move_once_short(&mut head_position, &mut tail_position, motion.direction);
+            (head_position, tail_position) =
+                move_once_short(head_position, tail_position, motion.direction);
+
+            // We clone here because the actual tail position will change
             visited_locations.insert(tail_position.clone());
         }
     }
@@ -43,42 +43,45 @@ pub fn get_visited_positions_short_rope(input: &str) -> usize {
 }
 
 fn move_once_short(
-    head_position: &mut Position,
-    tail_position: &mut Position,
+    head_position: Position,
+    tail_position: Position,
     direction: Direction,
-) {
+) -> (Position, Position) {
+    let mut new_head = head_position;
+    let mut new_tail = tail_position;
+
     // We first move the head
     match direction {
-        Direction::Up => head_position.y += 1,
-        Direction::Right => head_position.x += 1,
-        Direction::Left => head_position.x -= 1,
-        Direction::Down => head_position.y -= 1,
+        Direction::Up => new_head.y += 1,
+        Direction::Right => new_head.x += 1,
+        Direction::Left => new_head.x -= 1,
+        Direction::Down => new_head.y -= 1,
     }
 
     // We move the tail if the distance to the head in any dimension is >= 2
-    if (head_position.x - tail_position.x).abs() >= 2
-        || (head_position.y - tail_position.y).abs() >= 2
-    {
+    if (new_head.x - new_tail.x).abs() >= 2 || (new_head.y - new_tail.y).abs() >= 2 {
         // When a move happens, the non-advancing coordinate will always be the same as the head
         match direction {
             Direction::Up => {
-                tail_position.y += 1;
-                tail_position.x = head_position.x;
+                new_tail.y += 1;
+                new_tail.x = new_head.x;
             }
             Direction::Right => {
-                tail_position.x += 1;
-                tail_position.y = head_position.y
+                new_tail.x += 1;
+                new_tail.y = new_head.y
             }
             Direction::Left => {
-                tail_position.x -= 1;
-                tail_position.y = head_position.y
+                new_tail.x -= 1;
+                new_tail.y = new_head.y
             }
             Direction::Down => {
-                tail_position.y -= 1;
-                tail_position.x = head_position.x;
+                new_tail.y -= 1;
+                new_tail.x = new_head.x;
             }
         }
     }
+
+    (new_head, new_tail)
 }
 
 pub fn get_visited_positions_long_rope(input: &str) -> usize {
@@ -93,9 +96,8 @@ pub fn get_visited_positions_long_rope(input: &str) -> usize {
     visited_locations.insert(rope[9].clone());
 
     for motion in motions {
-        // TODO Same as above, learn how to *not* modify the objects -> re-assign
         for _ in 0..motion.distance {
-            move_once_long(&mut rope, motion.direction);
+            rope = move_once_long(rope, motion.direction);
 
             visited_locations.insert(rope[9].clone());
         }
@@ -104,7 +106,9 @@ pub fn get_visited_positions_long_rope(input: &str) -> usize {
     visited_locations.len()
 }
 
-fn move_once_long(rope: &mut [Position; 10], direction: Direction) {
+fn move_once_long(rope: [Position; 10], direction: Direction) -> [Position; 10] {
+    let mut rope = rope;
+
     // We start by moving the head
     match direction {
         Direction::Up => rope[0].y += 1,
@@ -160,6 +164,8 @@ fn move_once_long(rope: &mut [Position; 10], direction: Direction) {
             tail.y -= 1;
         }
     }
+
+    rope
 }
 
 fn get_motions(input: &str) -> Vec<Motion> {
@@ -182,7 +188,7 @@ fn get_motions(input: &str) -> Vec<Motion> {
                 distance,
             }
         })
-        .collect_vec()
+        .collect()
 }
 
 #[cfg(test)]
@@ -233,20 +239,26 @@ R 2";
         let mut head_position = Position { x: 0, y: 0 };
         let mut tail_position = Position { x: 0, y: 0 };
 
-        move_once_short(&mut head_position, &mut tail_position, Direction::Right);
-        move_once_short(&mut head_position, &mut tail_position, Direction::Right);
-        move_once_short(&mut head_position, &mut tail_position, Direction::Right);
-        move_once_short(&mut head_position, &mut tail_position, Direction::Right);
+        (head_position, tail_position) =
+            move_once_short(head_position, tail_position, Direction::Right);
+        (head_position, tail_position) =
+            move_once_short(head_position, tail_position, Direction::Right);
+        (head_position, tail_position) =
+            move_once_short(head_position, tail_position, Direction::Right);
+        (head_position, tail_position) =
+            move_once_short(head_position, tail_position, Direction::Right);
 
         assert_eq!(head_position, Position { x: 4, y: 0 });
         assert_eq!(tail_position, Position { x: 3, y: 0 });
 
-        move_once_short(&mut head_position, &mut tail_position, Direction::Up);
+        (head_position, tail_position) =
+            move_once_short(head_position, tail_position, Direction::Up);
 
         assert_eq!(head_position, Position { x: 4, y: 1 });
         assert_eq!(tail_position, Position { x: 3, y: 0 });
 
-        move_once_short(&mut head_position, &mut tail_position, Direction::Up);
+        (head_position, tail_position) =
+            move_once_short(head_position, tail_position, Direction::Up);
 
         assert_eq!(head_position, Position { x: 4, y: 2 });
         assert_eq!(tail_position, Position { x: 4, y: 1 });
@@ -256,21 +268,21 @@ R 2";
     fn test_move_rope_long() {
         let mut rope = [Position { x: 0, y: 0 }; 10];
 
-        move_once_long(&mut rope, Direction::Right);
-        move_once_long(&mut rope, Direction::Right);
-        move_once_long(&mut rope, Direction::Right);
-        move_once_long(&mut rope, Direction::Right);
+        rope = move_once_long(rope, Direction::Right);
+        rope = move_once_long(rope, Direction::Right);
+        rope = move_once_long(rope, Direction::Right);
+        rope = move_once_long(rope, Direction::Right);
 
         assert_eq!(rope[0], Position { x: 4, y: 0 });
         assert_eq!(rope[1], Position { x: 3, y: 0 });
         assert_eq!(rope[9], Position { x: 0, y: 0 });
 
-        move_once_long(&mut rope, Direction::Up);
+        rope = move_once_long(rope, Direction::Up);
 
         assert_eq!(rope[0], Position { x: 4, y: 1 });
         assert_eq!(rope[1], Position { x: 3, y: 0 });
 
-        move_once_long(&mut rope, Direction::Up);
+        rope = move_once_long(rope, Direction::Up);
 
         // Cf test example:
         // ......
