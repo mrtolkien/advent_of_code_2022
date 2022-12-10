@@ -223,6 +223,12 @@ R 2";
     }
 
     #[test]
+    #[should_panic]
+    fn test_get_motions_panic() {
+        get_motions("W 4");
+    }
+
+    #[test]
     fn test_move_rope_short() {
         let mut head_position = Position { x: 0, y: 0 };
         let mut tail_position = Position { x: 0, y: 0 };

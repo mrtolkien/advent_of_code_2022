@@ -1,4 +1,4 @@
-use advent_of_code_2022::{day_1, day_2, day_3, day_4, day_5, day_6, day_7, day_8, day_9};
+use advent_of_code_2022::{day_1, day_10, day_2, day_3, day_4, day_5, day_6, day_7, day_8, day_9};
 use std::{fmt::Display, fs};
 
 fn get_day_input(day: u8) -> String {
@@ -9,7 +9,7 @@ fn get_day_input(day: u8) -> String {
 }
 
 fn main() {
-    for i in 1..=10 {
+    for i in 1..=11 {
         // We read the input from the file
         let input = get_day_input(i);
         let input = input.as_str();
@@ -54,6 +54,10 @@ fn main() {
                 Box::new(day_9::get_visited_positions_short_rope(input)),
                 Box::new(day_9::get_visited_positions_long_rope(input)),
             ),
+            10 => (
+                Box::new(day_10::get_signal_strength_sum(input)),
+                Box::new(day_10::get_drawing(input)),
+            ),
             // Not panicking helps test it properly
             _ => (
                 Box::new(format!("Day {i} not handled yet")),
@@ -61,8 +65,8 @@ fn main() {
             ),
         };
 
-        println!("Day {i}.1 result: {}", results.0);
-        println!("Day {i}.2 result: {}", results.1);
+        println!("Day {i}.1 result:\n{}", results.0);
+        println!("Day {i}.2 result:\n{}", results.1);
     }
 }
 
