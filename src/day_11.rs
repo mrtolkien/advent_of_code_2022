@@ -1,3 +1,4 @@
+use itertools::Itertools;
 use nom::{
     bytes::complete::{is_not, tag},
     character::complete::digit1,
@@ -7,20 +8,84 @@ use nom::{
 };
 
 struct Monkey {
-    id: usize,
-    starting_items: Vec<usize>,
-    operation: Box<dyn Fn(usize) -> usize>,
+    items: Vec<usize>,
+    operation: Operation,
     divisible_by: usize,
     if_true: usize,
     if_false: usize,
+    inspected: usize,
+}
+
+#[derive(Debug, PartialEq)]
+enum Operation {
+    Multiply(usize),
+    Add(usize),
+    Square,
+}
+
+impl Operation {
+    fn apply(&self, value: usize) -> usize {
+        match *self {
+            Operation::Multiply(m) => m * value,
+            Operation::Add(a) => a + value,
+            Operation::Square => value * value,
+        }
+    }
 }
 
 pub fn get_monkey_business_level(input: &str) -> usize {
-    todo!()
+    let mut monkeys = parse_monkeys(input);
+
+    for _ in 0..20 {
+        monkeys = play_round(monkeys)
+    }
+
+    monkeys
+        .iter()
+        .map(|m| m.inspected)
+        .sorted_unstable()
+        .rev()
+        .take(2)
+        .product()
+}
+
+fn play_round(monkeys: Vec<Monkey>) -> Vec<Monkey> {
+    let mut monkeys = monkeys;
+
+    for monkey_idx in 0..monkeys.len() {
+        // Iterate while popping
+        while let Some(item) = monkeys[monkey_idx].items.pop() {
+            // We get the worry level
+            let worry_level = monkeys[monkey_idx].operation.apply(item) / 3;
+            monkeys[monkey_idx].inspected += 1;
+
+            // We decide which monkey to send the item to
+            let target;
+            if worry_level % monkeys[monkey_idx].divisible_by == 0 {
+                target = monkeys[monkey_idx].if_true;
+            } else {
+                target = monkeys[monkey_idx].if_false;
+            };
+
+            // We send the item to the target monkey
+            monkeys[target].items.push(worry_level);
+        }
+    }
+
+    monkeys
+}
+
+fn parse_monkeys(input: &str) -> Vec<Monkey> {
+    // TODO Separated list once again...
+    input
+        .split("\n\n")
+        .map(|m| parse_monkey(m).unwrap().1)
+        .collect_vec()
 }
 
 fn parse_monkey(input: &str) -> IResult<&str, Monkey> {
-    let (_, (monkey_id, items, operation, divisible_by, true_target, false_target)) = tuple((
+    // TODO I think this should use map_res instead of ?
+    let (_, (_, items, operation, divisible_by, if_true, if_false)) = tuple((
         nom_monkey,
         nom_items,
         nom_operation,
@@ -32,14 +97,28 @@ fn parse_monkey(input: &str) -> IResult<&str, Monkey> {
     Ok((
         "",
         Monkey {
-            id: monkey_id,
-            starting_items: items,
-            operation: Box::new(|x| x),
+            items,
+            operation: parse_operation(operation),
             divisible_by,
-            if_true: true_target,
-            if_false: false_target,
+            if_true,
+            if_false,
+            inspected: 0,
         },
     ))
+}
+
+fn parse_operation(input: &str) -> Operation {
+    // TODO try not to use unwrap/use nom here too
+    let (operator, value) = input.split_once(' ').unwrap();
+
+    match operator {
+        "*" => match value {
+            "old" => Operation::Square,
+            _ => Operation::Multiply(value.parse().unwrap()),
+        },
+        "+" => Operation::Add(value.parse().unwrap()),
+        _ => panic!("Operation not handled yet: {input}"),
+    }
 }
 
 fn nom_monkey(s: &str) -> IResult<&str, usize> {
@@ -50,8 +129,8 @@ fn nom_monkey(s: &str) -> IResult<&str, usize> {
 }
 
 fn nom_items(s: &str) -> IResult<&str, Vec<usize>> {
-    let (remainder, items) = delimited(tag("Starting items: "), is_not("\n"), tag("\n"))(s)?;
-    // TODO Understand that one
+    let (remainder, items) = delimited(tag("  Starting items: "), is_not("\n"), tag("\n"))(s)?;
+    // TODO Understand that one and make it work
     // let (_, items) = separated_list0(tag(", "), is_not("/"))(items)?;
 
     // In the meanwhile, this works
@@ -62,12 +141,12 @@ fn nom_items(s: &str) -> IResult<&str, Vec<usize>> {
 }
 
 fn nom_operation(s: &str) -> IResult<&str, &str> {
-    delimited(tag("Operation: new = "), is_not("\n"), tag("\n"))(s)
+    delimited(tag("  Operation: new = old "), is_not("\n"), tag("\n"))(s)
 }
 
 fn nom_divisible_by(s: &str) -> IResult<&str, usize> {
     map_res(
-        delimited(tag("Test: divisible by "), digit1, tag("\n")),
+        delimited(tag("  Test: divisible by "), digit1, tag("\n")),
         |out: &str| usize::from_str_radix(out, 10),
     )(s)
 }
@@ -92,11 +171,23 @@ mod tests {
     use super::*;
 
     const DEMO_MONKEY: &str = "Monkey 0:
-Starting items: 79, 98
-Operation: new = old * 19
-Test: divisible by 23
+  Starting items: 79, 98
+  Operation: new = old * 19
+  Test: divisible by 23
     If true: throw to monkey 2
     If false: throw to monkey 3";
+
+    #[test]
+    fn test_parse_command() {
+        let mul = parse_operation("* 19");
+
+        assert_eq!(mul, Operation::Multiply(19));
+        assert_eq!(mul.apply(20), 19 * 20);
+
+        let add = parse_operation("+ 19");
+        assert_eq!(add, Operation::Add(19));
+        assert_eq!(add.apply(20), 19 + 20);
+    }
 
     #[test]
     fn test_nom() {
@@ -108,7 +199,7 @@ Test: divisible by 23
         assert_eq!(res, vec![79, 98]);
 
         let (_, (_, _, res)) = tuple((nom_monkey, nom_items, nom_operation))(DEMO_MONKEY).unwrap();
-        assert_eq!(res, "old * 19");
+        assert_eq!(res, "* 19");
 
         let (_, (_, _, _, res)) =
             tuple((nom_monkey, nom_items, nom_operation, nom_divisible_by))(DEMO_MONKEY).unwrap();
@@ -132,37 +223,44 @@ Test: divisible by 23
     fn test_parse_monkey() {
         let monkey = parse_monkey(DEMO_MONKEY).unwrap().1;
 
-        assert_eq!(monkey.starting_items, vec![79, 98]);
+        assert_eq!(monkey.items, vec![79, 98]);
         assert_eq!(monkey.divisible_by, 23);
         assert_eq!(monkey.if_true, 2);
         assert_eq!(monkey.if_false, 3);
     }
 
+    #[test]
+    fn test_parse_monkeys() {
+        let monkeys = parse_monkeys(DEMO_INPUT);
+
+        assert_eq!(monkeys.len(), 4);
+    }
+
     const DEMO_INPUT: &str = "Monkey 0:
-Starting items: 79, 98
-Operation: new = old * 19
-Test: divisible by 23
+  Starting items: 79, 98
+  Operation: new = old * 19
+  Test: divisible by 23
     If true: throw to monkey 2
     If false: throw to monkey 3
 
 Monkey 1:
-Starting items: 54, 65, 75, 74
-Operation: new = old + 6
-Test: divisible by 19
+  Starting items: 54, 65, 75, 74
+  Operation: new = old + 6
+  Test: divisible by 19
     If true: throw to monkey 2
     If false: throw to monkey 0
 
 Monkey 2:
-Starting items: 79, 60, 97
-Operation: new = old * old
-Test: divisible by 13
+  Starting items: 79, 60, 97
+  Operation: new = old * old
+  Test: divisible by 13
     If true: throw to monkey 1
     If false: throw to monkey 3
 
 Monkey 3:
-Starting items: 74
-Operation: new = old + 3
-Test: divisible by 17
+  Starting items: 74
+  Operation: new = old + 3
+  Test: divisible by 17
     If true: throw to monkey 0
     If false: throw to monkey 1";
 
