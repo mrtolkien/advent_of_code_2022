@@ -61,8 +61,14 @@ fn main() {
                 Box::new(day_10::get_drawing(input)),
             ),
             11 => (
-                Box::new(day_11::get_monkey_business_level(input)),
-                Box::new(day_11::get_monkey_business_level(input)),
+                Box::new(day_11::get_monkey_business_level(
+                    input,
+                    day_11::MonkeyBusinessLevel::V1,
+                )),
+                Box::new(day_11::get_monkey_business_level(
+                    input,
+                    day_11::MonkeyBusinessLevel::V2,
+                )),
             ),
             // Not panicking helps test it properly
             _ => (

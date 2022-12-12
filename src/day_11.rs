@@ -33,11 +33,21 @@ impl Operation {
     }
 }
 
-pub fn get_monkey_business_level(input: &str) -> usize {
+pub enum MonkeyBusinessLevel {
+    V1,
+    V2,
+}
+
+pub fn get_monkey_business_level(input: &str, level: MonkeyBusinessLevel) -> usize {
     let mut monkeys = parse_monkeys(input);
 
-    for _ in 0..20 {
-        monkeys = play_round(monkeys)
+    let length = match level {
+        MonkeyBusinessLevel::V1 => 20,
+        MonkeyBusinessLevel::V2 => 10_000,
+    };
+
+    for _ in 0..length {
+        monkeys = play_round(monkeys, &level);
     }
 
     monkeys
@@ -49,14 +59,21 @@ pub fn get_monkey_business_level(input: &str) -> usize {
         .product()
 }
 
-fn play_round(monkeys: Vec<Monkey>) -> Vec<Monkey> {
+fn play_round(monkeys: Vec<Monkey>, level: &MonkeyBusinessLevel) -> Vec<Monkey> {
     let mut monkeys = monkeys;
+    // We will check if worry_level is divisible by *any* of the monkeys' divisible_by
+    //  So we can use the common divisor to simplify the value every time it gets bigger
+    let common_divisor: usize = monkeys.iter().map(|m| m.divisible_by).product();
 
     for monkey_idx in 0..monkeys.len() {
         // Iterate while popping
         while let Some(item) = monkeys[monkey_idx].items.pop() {
             // We get the worry level
-            let worry_level = monkeys[monkey_idx].operation.apply(item) / 3;
+            let worry_level = match level {
+                MonkeyBusinessLevel::V1 => monkeys[monkey_idx].operation.apply(item) / 3,
+                MonkeyBusinessLevel::V2 => monkeys[monkey_idx].operation.apply(item),
+            };
+
             monkeys[monkey_idx].inspected += 1;
 
             // We decide which monkey to send the item to
@@ -68,7 +85,7 @@ fn play_round(monkeys: Vec<Monkey>) -> Vec<Monkey> {
             };
 
             // We send the item to the target monkey
-            monkeys[target].items.push(worry_level);
+            monkeys[target].items.push(worry_level % common_divisor);
         }
     }
 
@@ -266,6 +283,17 @@ Monkey 3:
 
     #[test]
     fn test_first_part() {
-        assert_eq!(get_monkey_business_level(DEMO_INPUT), 10605)
+        assert_eq!(
+            get_monkey_business_level(DEMO_INPUT, MonkeyBusinessLevel::V1),
+            10605
+        )
+    }
+
+    #[test]
+    fn test_second_part() {
+        assert_eq!(
+            get_monkey_business_level(DEMO_INPUT, MonkeyBusinessLevel::V2),
+            2713310158
+        )
     }
 }
