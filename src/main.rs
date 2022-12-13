@@ -11,7 +11,7 @@ fn get_day_input(day: u8) -> String {
 }
 
 fn main() {
-    for i in 1..=13 {
+    for i in 1..=14 {
         // We read the input from the file
         let input = get_day_input(i);
         let input = input.as_str();
