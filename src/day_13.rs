@@ -1,3 +1,5 @@
+use std::iter::zip;
+
 use nom::multi::separated_list0;
 use nom::sequence::separated_pair;
 use nom::{
@@ -10,6 +12,15 @@ pub fn get_right_order_pairs_index_sum(input: &str) -> usize {
     let mut result = 0;
 
     for (idx, (left, right)) in input.iter().enumerate() {
+        // TODO Check behaviour when one side is longer than the other
+        for (left_value, right_value) in zip(left, right) {
+            match (left_value, right_value) {
+                (Value::Number(_), Value::Number(_)) => todo!(),
+                (Value::Array(_), Value::Array(_)) => todo!(),
+                (Value::Number(_), Value::Array(_)) => todo!(),
+                (Value::Array(_), Value::Number(_)) => todo!(),
+            }
+        }
         // TODO Get the right test here!
         if left == right {
             result += idx + 1;
