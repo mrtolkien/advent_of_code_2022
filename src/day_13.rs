@@ -1,3 +1,5 @@
+use std::iter::zip;
+
 use nom::multi::separated_list0;
 use nom::sequence::separated_pair;
 use nom::{
@@ -10,7 +12,7 @@ pub fn get_right_order_pairs_index_sum(input: &str) -> usize {
     let mut result = 0;
 
     for (idx, (left, right)) in input.iter().enumerate() {
-        if left <= right {
+        if left < right {
             result += idx + 1;
         }
     }
@@ -18,10 +20,39 @@ pub fn get_right_order_pairs_index_sum(input: &str) -> usize {
     result
 }
 
-#[derive(Debug, PartialEq, PartialOrd)]
+#[derive(Debug, PartialEq, Clone)]
 enum Value {
     Number(usize),
     Array(Vec<Value>),
+}
+
+impl PartialOrd for Value {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        match (self, other) {
+            // Simple comparison
+            (Value::Number(s), Value::Number(o)) => Some(s.cmp(o)),
+            (Value::Array(s), Value::Array(o)) => {
+                for (left, right) in zip(s, o) {
+                    if left < right {
+                        return Some(std::cmp::Ordering::Less);
+                    } else if left > right {
+                        return Some(std::cmp::Ordering::Greater);
+                    }
+                }
+
+                // If we get there, the comparison was not conclusive
+                //    -> We compare lengths
+                Some(s.len().cmp(&o.len()))
+            }
+            (Value::Number(_), Value::Array(_)) => {
+                Some(Value::Array(vec![self.clone()]).partial_cmp(other).unwrap())
+            }
+            (Value::Array(_), Value::Number(_)) => Some(
+                self.partial_cmp(&Value::Array(vec![other.clone()]))
+                    .unwrap(),
+            ),
+        }
+    }
 }
 
 // TODO !ORDERING CODE!

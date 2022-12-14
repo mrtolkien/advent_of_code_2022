@@ -1,5 +1,5 @@
 use advent_of_code_2022::{
-    day_1, day_10, day_11, day_12, day_2, day_3, day_4, day_5, day_6, day_7, day_8, day_9,
+    day_1, day_10, day_11, day_12, day_13, day_2, day_3, day_4, day_5, day_6, day_7, day_8, day_9,
 };
 use std::{fmt::Display, fs};
 
@@ -73,6 +73,10 @@ fn main() {
             12 => (
                 Box::new(day_12::get_minimum_steps_count(input)),
                 Box::new(day_12::get_best_starting_position_step_count(input)),
+            ),
+            13 => (
+                Box::new(day_13::get_right_order_pairs_index_sum(input)),
+                Box::new(day_13::get_right_order_pairs_index_sum(input)),
             ),
             // Not panicking helps test it properly
             _ => (
