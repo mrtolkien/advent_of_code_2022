@@ -76,7 +76,7 @@ fn main() {
             ),
             13 => (
                 Box::new(day_13::get_right_order_pairs_index_sum(input)),
-                Box::new(day_13::get_right_order_pairs_index_sum(input)),
+                Box::new(day_13::get_divider_packets_location(input)),
             ),
             // Not panicking helps test it properly
             _ => (

@@ -6,6 +6,7 @@ use nom::{
     branch::alt, bytes::complete::tag, character::complete::digit1, combinator::map,
     sequence::delimited, IResult,
 };
+use strum_macros::Display;
 
 pub fn get_right_order_pairs_index_sum(input: &str) -> usize {
     let input = parse_input(input);
@@ -20,42 +21,66 @@ pub fn get_right_order_pairs_index_sum(input: &str) -> usize {
     result
 }
 
-#[derive(Debug, PartialEq, Clone)]
+pub fn get_divider_packets_location(input: &str) -> usize {
+    // We flatten all values into a single vec
+    let input = parse_input(input);
+    let mut values: Vec<&Value> = input
+        .iter()
+        .flat_map(|(left, right)| vec![left, right])
+        .collect();
+
+    // We add the divider packets
+    let first_divider = Value::Array(vec![Value::Array(vec![Value::Number(2)])]);
+    let second_divider = Value::Array(vec![Value::Array(vec![Value::Number(6)])]);
+    values.push(&first_divider);
+    values.push(&second_divider);
+
+    // We sort the values
+    values.sort();
+
+    // We get indexes
+    let first_divider_idx = values.iter().position(|v| v == &&first_divider).unwrap() + 1;
+    let second_divider_idx = values.iter().position(|v| v == &&second_divider).unwrap() + 1;
+
+    first_divider_idx * second_divider_idx
+}
+
+#[derive(Debug, PartialEq, Clone, Eq, Display)]
 enum Value {
     Number(usize),
     Array(Vec<Value>),
 }
 
-impl PartialOrd for Value {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+impl Ord for Value {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
         match (self, other) {
             // Simple comparison
-            (Value::Number(s), Value::Number(o)) => Some(s.cmp(o)),
+            (Value::Number(s), Value::Number(o)) => s.cmp(o),
             (Value::Array(s), Value::Array(o)) => {
                 for (left, right) in zip(s, o) {
                     if left < right {
-                        return Some(std::cmp::Ordering::Less);
+                        return std::cmp::Ordering::Less;
                     } else if left > right {
-                        return Some(std::cmp::Ordering::Greater);
+                        return std::cmp::Ordering::Greater;
                     }
                 }
 
                 // If we get there, the comparison was not conclusive
                 //    -> We compare lengths
-                Some(s.len().cmp(&o.len()))
+                s.len().cmp(&o.len())
             }
-            (Value::Number(_), Value::Array(_)) => {
-                Some(Value::Array(vec![self.clone()]).partial_cmp(other).unwrap())
-            }
-            (Value::Array(_), Value::Number(_)) => Some(
-                self.partial_cmp(&Value::Array(vec![other.clone()]))
-                    .unwrap(),
-            ),
+            (Value::Number(_), Value::Array(_)) => Value::Array(vec![self.clone()]).cmp(other),
+            (Value::Array(_), Value::Number(_)) => self.cmp(&Value::Array(vec![other.clone()])),
         }
     }
 }
 
-// TODO !ORDERING CODE!
+impl PartialOrd for Value {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        // We simply re-use our order
+        Some(self.cmp(other))
+    }
+}
 
 fn parse_input(input: &str) -> Vec<(Value, Value)> {
     match separated_list0(tag("\n\n"), parse_packet)(input) {
@@ -170,5 +195,10 @@ mod tests {
     #[test]
     fn test_first_part() {
         assert_eq!(get_right_order_pairs_index_sum(DEMO_INPUT), 13)
+    }
+
+    #[test]
+    fn test_second_part() {
+        assert_eq!(get_divider_packets_location(DEMO_INPUT), 140)
     }
 }
