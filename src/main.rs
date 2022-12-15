@@ -81,7 +81,7 @@ fn main() {
             ),
             14 => (
                 Box::new(day_14::sand_count_before_end(input)),
-                Box::new(day_14::sand_count_before_end(input)),
+                Box::new(day_14::sand_count_before_end_with_ground(input)),
             ),
             // Not panicking helps test it properly
             _ => (

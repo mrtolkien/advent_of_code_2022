@@ -15,7 +15,7 @@ pub fn sand_count_before_end(input: &str) -> usize {
     let mut result = 0;
 
     loop {
-        match drop_sand(&map) {
+        match drop_sand_infinite(&map) {
             Some(position) => map[position.x as usize][position.y as usize] = Status::Sand,
             None => break,
         };
@@ -26,7 +26,44 @@ pub fn sand_count_before_end(input: &str) -> usize {
     result
 }
 
-fn drop_sand(map: &Grid<Status>) -> Option<Point> {
+pub fn sand_count_before_end_with_ground(input: &str) -> usize {
+    let input = parse_input(input);
+
+    let mut map = create_map(&input);
+
+    // Dirty solution
+    // -> We *actually* write down the rock ground and don't change the sand drop code
+    let max_y = input
+        .iter()
+        .map(|s| s.iter().map(|p| p.y).max().unwrap())
+        .max()
+        .unwrap();
+
+    for x in 0..map.rows() {
+        map[x][max_y as usize + 2] = Status::Rock;
+    }
+
+    let mut result = 0;
+
+    loop {
+        match drop_sand_infinite(&map) {
+            Some(position) => {
+                map[position.x as usize][position.y as usize] = Status::Sand;
+                if position == (Point { x: 500, y: 0 }) {
+                    break;
+                }
+            }
+            None => panic!("That wasn't supposed to happen"),
+        };
+
+        result += 1;
+    }
+
+    // We add one as we count the origin too
+    result + 1
+}
+
+fn drop_sand_infinite(map: &Grid<Status>) -> Option<Point> {
     // We start at 500,0
     let mut position = Point { x: 500, y: 0 };
 
@@ -127,8 +164,8 @@ fn create_map(input: &Vec<Vec<Point>>) -> Grid<Status> {
         .unwrap();
 
     // We assume x/y cannot go below 0, looks ok with the data set
-    //  We add 10 as sand can drop diagonally... It's good enough here
-    let mut map: Grid<Status> = Grid::new((max_x + 10) as usize, (max_y + 10) as usize);
+    //  We add 100 as sand can drop diagonally... It's good enough here
+    let mut map: Grid<Status> = Grid::new((max_x + 100) as usize, (max_y + 100) as usize);
 
     // We fill the points from the vects with Rocks
     for rock_structure in input {
@@ -221,5 +258,10 @@ mod tests {
     #[test]
     fn test_part_1() {
         assert_eq!(sand_count_before_end(DEMO_INPUT), 24);
+    }
+
+    #[test]
+    fn test_part_2() {
+        assert_eq!(sand_count_before_end_with_ground(DEMO_INPUT), 93);
     }
 }
