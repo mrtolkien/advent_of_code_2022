@@ -79,6 +79,10 @@ fn main() {
                 Box::new(day_13::get_right_order_pairs_index_sum(input)),
                 Box::new(day_13::get_divider_packets_location(input)),
             ),
+            14 => (
+                Box::new(day_14::sand_count_before_end(input)),
+                Box::new(day_14::sand_count_before_end(input)),
+            ),
             // Not panicking helps test it properly
             _ => (
                 Box::new(format!("Day {i} not handled yet")),
