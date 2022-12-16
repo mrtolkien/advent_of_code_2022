@@ -12,7 +12,7 @@ fn get_day_input(day: u8) -> String {
 }
 
 fn main() {
-    for i in 1..=16 {
+    for i in 1..=17 {
         // We read the input from the file
         let input = get_day_input(i);
         let input = input.as_str();
@@ -84,8 +84,8 @@ fn main() {
                 Box::new(day_14::sand_count_before_end_with_ground(input)),
             ),
             15 => (
-                Box::new(day_15::no_beacon_count(input, 10)),
-                Box::new(day_15::no_beacon_count(input, 10)),
+                Box::new(day_15::no_beacon_count(input, 2_000_000)),
+                Box::new(day_15::get_tuning_frequency(input, 4_000_000)),
             ),
             // Not panicking helps test it properly
             _ => (
@@ -99,12 +99,13 @@ fn main() {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+// With runtime increasing this shouldn't be in tests!
+// #[cfg(test)]
+// mod tests {
+//     use super::*;
 
-    #[test]
-    fn test_full_run() {
-        main();
-    }
-}
+//     #[test]
+//     fn test_full_run() {
+//         main();
+//     }
+// }
