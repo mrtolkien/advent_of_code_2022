@@ -5,6 +5,7 @@ use nom::{
     multi::separated_list1,
     IResult,
 };
+use rayon::prelude::*;
 
 pub fn no_beacon_count(input: &str, row: isize) -> usize {
     let input = parse_input(input);
@@ -45,20 +46,39 @@ pub fn no_beacon_count(input: &str, row: isize) -> usize {
 pub fn get_tuning_frequency(input: &str, search_size: usize) -> usize {
     let input = parse_input(input);
 
-    for x in 0..search_size {
-        for y in 0..search_size {
+    // for x in 0..search_size {
+    //     for y in 0..search_size {
+    //         if all(&input, |(sensor, beacon)| {
+    //             let sensor_max_dist = manhattan_distance(sensor, beacon);
+    //             let point_dist = manhattan_distance(sensor, &Point::new(x as isize, y as isize));
+
+    //             point_dist > sensor_max_dist
+    //         }) {
+    //             return 4_000_000 * x + y;
+    //         }
+    //     }
+    // }
+
+    let (x, y) = (0..search_size)
+        .into_par_iter()
+        .flat_map(|x| (0..search_size).into_par_iter().map(move |y| (x, y)))
+        .find_first(|(x, y)| {
             if all(&input, |(sensor, beacon)| {
                 let sensor_max_dist = manhattan_distance(sensor, beacon);
-                let point_dist = manhattan_distance(sensor, &Point::new(x as isize, y as isize));
+                let point_dist = manhattan_distance(sensor, &Point::new(*x as isize, *y as isize));
 
                 point_dist > sensor_max_dist
             }) {
-                return 4_000_000 * x + y;
+                // We found our point
+                true
+                // return 4_000_000 * x + y;
+            } else {
+                false
             }
-        }
-    }
+        })
+        .unwrap();
 
-    unreachable!("No solution found")
+    return 4_000_000 * x + y;
 }
 
 /// Returns sensor -> beacon info
