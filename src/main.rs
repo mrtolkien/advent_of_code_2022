@@ -1,6 +1,6 @@
 use advent_of_code_2022::{
-    day_1, day_10, day_11, day_12, day_13, day_14, day_2, day_3, day_4, day_5, day_6, day_7, day_8,
-    day_9,
+    day_1, day_10, day_11, day_12, day_13, day_14, day_15, day_2, day_3, day_4, day_5, day_6,
+    day_7, day_8, day_9,
 };
 use std::{fmt::Display, fs};
 
@@ -12,7 +12,7 @@ fn get_day_input(day: u8) -> String {
 }
 
 fn main() {
-    for i in 1..=14 {
+    for i in 1..=16 {
         // We read the input from the file
         let input = get_day_input(i);
         let input = input.as_str();
@@ -82,6 +82,10 @@ fn main() {
             14 => (
                 Box::new(day_14::sand_count_before_end(input)),
                 Box::new(day_14::sand_count_before_end_with_ground(input)),
+            ),
+            15 => (
+                Box::new(day_15::no_beacon_count(input, 10)),
+                Box::new(day_15::no_beacon_count(input, 10)),
             ),
             // Not panicking helps test it properly
             _ => (
