@@ -5,7 +5,11 @@ use nom::{
     multi::separated_list1,
     IResult,
 };
+use ranges::Ranges;
 use rayon::prelude::*;
+
+// Notes:
+// - geo was pretty pointless in the end
 
 pub fn no_beacon_count(input: &str, row: isize) -> usize {
     let input = parse_input(input);
@@ -31,7 +35,7 @@ pub fn no_beacon_count(input: &str, row: isize) -> usize {
             }
         }
 
-        // TODO We need to remove actual beacons... That's a bit stupid code but it works
+        // We need to remove actual beacons... That's a bit stupid code but it works
         for (_, beacon) in &input {
             if beacon.eq(&Point::new(x, row)) {
                 result -= 1;
@@ -44,41 +48,57 @@ pub fn no_beacon_count(input: &str, row: isize) -> usize {
 }
 
 pub fn get_tuning_frequency(input: &str, search_size: usize) -> usize {
-    let input = parse_input(input);
+    let sensors = parse_input(input);
 
-    // for x in 0..search_size {
-    //     for y in 0..search_size {
-    //         if all(&input, |(sensor, beacon)| {
-    //             let sensor_max_dist = manhattan_distance(sensor, beacon);
-    //             let point_dist = manhattan_distance(sensor, &Point::new(x as isize, y as isize));
+    // Row-based implementation (not parallel)
+    // That was pretty heavily inted by part one but my solution was stupid!
+    for x in 0..search_size {
+        let ranges = get_row_y_range(&sensors, x, search_size);
 
-    //             point_dist > sensor_max_dist
-    //         }) {
-    //             return 4_000_000 * x + y;
-    //         }
-    //     }
-    // }
+        let symetric_difference = ranges ^ Ranges::from(0..=search_size as isize);
 
-    let (x, y) = (0..search_size)
-        .into_par_iter()
-        .flat_map(|x| (0..search_size).into_par_iter().map(move |y| (x, y)))
-        .find_first(|(x, y)| {
-            if all(&input, |(sensor, beacon)| {
-                let sensor_max_dist = manhattan_distance(sensor, beacon);
-                let point_dist = manhattan_distance(sensor, &Point::new(*x as isize, *y as isize));
+        if !symetric_difference.is_empty() {
+            // Disgusting but it works... Not satisfied with it though
+            return 4_000_000 * x
+                + symetric_difference.as_slice()[0]
+                    .into_iter()
+                    .next()
+                    .unwrap() as usize;
+        }
+    }
 
-                point_dist > sensor_max_dist
-            }) {
-                // We found our point
-                true
-                // return 4_000_000 * x + y;
-            } else {
-                false
-            }
-        })
-        .unwrap();
+    unreachable!("No solution found")
+}
 
-    return 4_000_000 * x + y;
+fn get_row_y_range(
+    sensors: &Vec<(Point<isize>, Point<isize>)>,
+    x: usize,
+    search_size: usize,
+) -> Ranges<isize> {
+    let mut y_range = Ranges::new();
+
+    for (sensor, beacon) in sensors {
+        let sensor_max_dist = manhattan_distance(sensor, beacon);
+
+        // We calculate the distance on the x axis
+        let x_dist = (x as isize - sensor.x()).abs();
+
+        // If it's too far, we pass
+        if x_dist > sensor_max_dist {
+            continue;
+        }
+
+        // Else we calculate the delta on the y axis
+        let delta = (sensor_max_dist - x_dist).abs();
+
+        let y_min = (sensor.y() - delta).max(0).min(search_size as isize);
+        let y_max = (sensor.y() + delta).max(0).min(search_size as isize);
+
+        // This range includes both min and max
+        y_range += y_min..=y_max;
+    }
+
+    y_range
 }
 
 /// Returns sensor -> beacon info
@@ -137,6 +157,48 @@ fn get_max_relevant_coordinates(
         .unwrap()
 }
 
+/// Obsolete function, too slow even when made parallel!
+/// I'm keeping it here for reference, and it can be optimized with faster y/x search
+pub fn get_tuning_frequency_bruteforce(input: &str, search_size: usize) -> usize {
+    let input = parse_input(input);
+
+    // Linear version
+    // for x in 0..search_size {
+    //     for y in 0..search_size {
+    //         if all(&input, |(sensor, beacon)| {
+    //             let sensor_max_dist = manhattan_distance(sensor, beacon);
+    //             let point_dist = manhattan_distance(sensor, &Point::new(x as isize, y as isize));
+
+    //             point_dist > sensor_max_dist
+    //         }) {
+    //             return 4_000_000 * x + y;
+    //         }
+    //     }
+    // }
+
+    // Parallel version
+    let (x, y) = (0..search_size)
+        .into_par_iter()
+        .flat_map(|x| (0..search_size).into_par_iter().map(move |y| (x, y)))
+        .find_first(|(x, y)| {
+            if all(&input, |(sensor, beacon)| {
+                let sensor_max_dist = manhattan_distance(sensor, beacon);
+                let point_dist = manhattan_distance(sensor, &Point::new(*x as isize, *y as isize));
+
+                point_dist > sensor_max_dist
+            }) {
+                // We found our point
+                true
+                // return 4_000_000 * x + y;
+            } else {
+                false
+            }
+        })
+        .unwrap();
+
+    return 4_000_000 * x + y;
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -179,6 +241,27 @@ Sensor at x=20, y=1: closest beacon is at x=15, y=3";
 
     #[test]
     fn test_part_2() {
+        assert_eq!(get_tuning_frequency_bruteforce(DEMO_INPUT, 20), 56_000_011)
+    }
+
+    #[test]
+    fn test_part_2_smart() {
         assert_eq!(get_tuning_frequency(DEMO_INPUT, 20), 56_000_011)
+    }
+
+    #[test]
+    fn test_ranges() {
+        let mut ranges = Ranges::new();
+
+        ranges.insert(1..2);
+        ranges.insert(3..4);
+
+        assert!(ranges.len() == 2);
+        assert!(ranges.contains(&1));
+        assert!(!ranges.contains(&2));
+
+        ranges.insert(1..=3);
+
+        assert_eq!(ranges, Ranges::from(vec![1..=3]));
     }
 }
