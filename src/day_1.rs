@@ -1,9 +1,7 @@
-use rayon::prelude::*;
-
 fn get_calories(input: &str) -> usize {
     input
         // Rayon parallelizes the iterator!
-        .par_lines()
+        .lines()
         .map(|line| match line.parse::<usize>() {
             Ok(line_value) => line_value,
             Err(err) => panic!("Could not parse integer: {line} / {err}"),
@@ -14,13 +12,13 @@ fn get_calories(input: &str) -> usize {
 pub fn get_max_calories(input: &str) -> usize {
     input
         .split("\n\n")
-        .par_bridge()
         .map(get_calories)
         .max()
         .expect("No calories found in input {input}")
 }
 
-#[must_use] pub fn get_sum_top_three_calories(input: &str) -> usize {
+#[must_use]
+pub fn get_sum_top_three_calories(input: &str) -> usize {
     // We'll keep this sorted
     let mut top_3_calories: Vec<usize> = vec![0, 0, 0];
 
@@ -39,7 +37,7 @@ pub fn get_max_calories(input: &str) -> usize {
     }
 
     // P A R A L L E L /
-    top_3_calories.par_iter().sum()
+    top_3_calories.iter().sum()
 }
 
 #[cfg(test)]
